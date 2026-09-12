@@ -245,19 +245,19 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
     keywordGroup: 'artysciListing',
   }),
   '/jak-to-dziala': () => buildPageMetadata({
-    title: 'Jak Zlecić Obraz — Przewodnik Krok po Kroku',
+    title: 'Jak Zlecić Obraz - Przewodnik Krok po Kroku',
     description: 'Dowiedz się, jak działa platforma. Od publikacji zlecenia, przez oferty artystów, po realizację projektu i płatności.',
     path: '/jak-to-dziala',
     keywordGroup: 'jakToDziala',
   }),
   '/cennik': () => buildPageMetadata({
-    title: 'Cennik — Ile Kosztuje Obraz na Zamówienie',
+    title: 'Cennik - Ile Kosztuje Obraz na Zamówienie',
     description: 'Zobacz opłaty i prowizje platformy. Przejrzyste ceny dla zlecających i artystów. Rejestracja i publikacja zleceń są darmowe.',
     path: '/cennik',
     keywordGroup: 'cennik',
   }),
   '/faq': () => buildPageMetadata({
-    title: 'FAQ — Najczęstsze Pytania o Obrazy na Zamówienie',
+    title: 'FAQ - Najczęstsze Pytania o Obrazy na Zamówienie',
     description: 'Najczęściej zadawane pytania o zlecanie obrazów, oferty, płatności i bezpieczeństwo na platformie.',
     path: '/faq',
     keywordGroup: 'faq',
@@ -294,7 +294,7 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
   }),
   '/obrazy-na-zamowienie': () => buildPageMetadata({
     title: 'Obrazy Ręcznie Malowane na Zamówienie',
-    description: 'Obrazy Ręcznie Malowane na Zamówienie — zleć obraz dopasowany do wnętrza. Opisz pomysł, dodaj inspiracje, wybierz artystę. Rejestracja i publikacja darmowe.',
+    description: 'Obrazy Ręcznie Malowane na Zamówienie - zleć obraz dopasowany do wnętrza. Opisz pomysł, dodaj inspiracje, wybierz artystę. Rejestracja i publikacja darmowe.',
     path: '/obrazy-na-zamowienie',
     keywordGroup: 'obrazyNaZamowienie',
     schema: [
@@ -318,7 +318,7 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
     keywordGroup: 'zamowObraz',
   }),
   '/zlec-obraz': () => buildPageMetadata({
-    title: 'Zleć Wykonanie Obrazu Artyście — Jak Zlecić Obraz Krok po Kroku',
+    title: 'Zleć Wykonanie Obrazu Artyście - Jak Zlecić Obraz Krok po Kroku',
     description: 'Zleć obraz artyście - krok po kroku: opisz zlecenie, podaj wymiary, wybierz kolory, dodaj inspiracje, wybierz artystę. FAQ: cena, czas, płatność. Rejestracja darmowa.',
     path: '/zlec-obraz',
     keywordGroup: 'zlecObraz',
@@ -332,7 +332,7 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
     ],
   }),
   '/zlecenia-dla-artystow': () => buildPageMetadata({
-    title: 'Zlecenia dla Artystów i Malarzy — Zlecenia Malarskie Online',
+    title: 'Zlecenia dla Artystów i Malarzy - Zlecenia Malarskie Online',
     description: 'Zlecenia dla artystów malarzy: przeglądaj otwarte zlecenia malarskie, składaj oferty, komunikuj się ze zlecającymi i realizuj obrazy na zamówienie. Rejestracja darmowa.',
     path: '/zlecenia-dla-artystow',
     keywordGroup: 'zleceniaDlaArtystow',
@@ -377,7 +377,7 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
     keywordGroup: 'obrazyDoHotelu',
   }),
   '/blog': () => buildPageMetadata({
-    title: 'Blog — Porady i Inspiracje',
+    title: 'Blog - Porady i Inspiracje',
     description: 'Porady, inspiracje i przewodniki o obrazach ręcznie malowanych na zamówienie. Dowiedz się, jak zlecić obraz i wybrać artystę.',
     path: '/blog',
     keywordGroup: 'blog',
@@ -435,7 +435,7 @@ export function buildCommissionMetadata(opts: {
     dimensions,
   ];
   if (roomLabel) seoTitleParts.push(`do ${opts.roomType}`);
-  const seoTitle = `${seoTitleParts.join(' ')} — Zlecenie dla Artysty`;
+  const seoTitle = `${seoTitleParts.join(' ')} - Zlecenie dla Artysty`;
 
   const descParts = [
     opts.publicSummary,
@@ -500,7 +500,7 @@ export function buildArtistMetadata(opts: {
     `${opts.artistName} to artysta malarz dostępny na platformie. Zleć obraz bezpośrednio u wybranego twórcy.`;
 
   return buildPageMetadata({
-    title: `${opts.artistName} — Artysta Malarz`,
+    title: `${opts.artistName} - Artysta Malarz`,
     description,
     path: `/artysci/${opts.slug}`,
     keywords: [opts.artistName, ...opts.styles, ...opts.techniques, 'artysta malarz', 'zleć obraz', opts.location].filter(Boolean) as string[],
