@@ -1,4 +1,4 @@
-import { SEO_CONFIG } from './seo-config';
+import { SEO_CONFIG, CORE_INTENTS } from './seo-config';
 import { canonicalUrl, absoluteUrl } from './canonical';
 import { KEYWORDS, type KeywordGroup } from './keywords';
 import { buildOpenGraph, buildTwitterCard, absoluteDefaultOgImage } from './open-graph';
@@ -525,6 +525,7 @@ export function buildCommissionMetadata(opts: {
   const seoTitle = `${seoTitleParts.join(' ')} - Zlecenie dla Artysty`;
 
   const descParts = [
+    `Ręcznie malowany obraz na zamówienie: ${opts.title}.`,
     opts.publicSummary,
     `Styl: ${opts.style}.`,
     `Wymiary: ${dimensions}.`,
@@ -551,6 +552,7 @@ export function buildCommissionMetadata(opts: {
     roomLabel,
     opts.mood,
     styleLower.includes('abstrak') ? 'abstrakcyjny obraz' : null,
+    ...CORE_INTENTS,
   ].filter(Boolean) as string[];
 
   return buildPageMetadata({
@@ -584,13 +586,13 @@ export function buildArtistMetadata(opts: {
   ].filter(Boolean);
 
   const description = descParts.join(' ') ||
-    `${opts.artistName} to artysta malarz dostępny na platformie. Zleć obraz bezpośrednio u wybranego twórcy.`;
+    `${opts.artistName} tworzy ręcznie malowane obrazy na zamówienie online. Zleć obraz bezpośrednio u wybranego twórcy.`;
 
   return buildPageMetadata({
     title: `${opts.artistName} - Artysta Malarz`,
     description,
     path: `/artysci/${opts.slug}`,
-    keywords: [opts.artistName, ...opts.styles, ...opts.techniques, 'artysta malarz', 'zleć obraz', opts.location].filter(Boolean) as string[],
+    keywords: [opts.artistName, ...opts.styles, ...opts.techniques, 'artysta malarz', 'zleć obraz', opts.location, ...CORE_INTENTS].filter(Boolean) as string[],
     ogType: 'profile',
     ogImage: opts.avatarUrl,
     schema: opts.schema,

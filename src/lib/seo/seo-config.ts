@@ -26,6 +26,9 @@ export const SITE_TOPIC = 'Obrazy Ręcznie Malowane na Zamówienie';
 export const CORE_INTENTS = [
   'obrazy ręcznie malowane na zamówienie',
   'obrazy na zamówienie',
+  'obrazy na zamówienie online',
+  'ręcznie malowany obraz na zamówienie online',
+  'zamów obraz online',
   'zamów obraz',
   'zleć obraz',
   'zlecenia dla artystów',

@@ -30,6 +30,20 @@ const LOCALE = 'pl-PL';
 const OG_LOCALE = 'pl_PL';
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 
+// UWAGTA: musi być identyczne z src/lib/seo/seo-config.ts CORE_INTENTS — synchronizuj ręcznie przy każdej zmianie
+const CORE_INTENTS = [
+  'obrazy ręcznie malowane na zamówienie',
+  'obrazy na zamówienie',
+  'obrazy na zamówienie online',
+  'ręcznie malowany obraz na zamówienie online',
+  'zamów obraz online',
+  'zamów obraz',
+  'zleć obraz',
+  'zlecenia dla artystów',
+  'zlecenia malarskie',
+  'artyści na zamówienie',
+];
+
 // ─── Env ─────────────────────────────────────────────────────────────────────
 
 function parseEnv(filePath) {
@@ -687,14 +701,14 @@ async function main() {
       Array.isArray(artist.techniques) && artist.techniques.length > 0 ? `Techniki: ${artist.techniques.join(', ')}.` : '',
       artist.location ? `Lokalizacja: ${artist.location}.` : '',
     ].filter(Boolean);
-    const description = descParts.join(' ') || `${artist.artist_name} to artysta malarz dostępny na platformie. Zleć obraz bezpośrednio u wybranego twórcy.`;
+    const description = descParts.join(' ') || `${artist.artist_name} tworzy ręcznie malowane obrazy na zamówienie online. Zleć obraz bezpośrednio u wybranego twórcy.`;
     const html = buildPage({
       title: `${artist.artist_name} — Artysta Malarz`,
       description,
       canonicalPath: routePath,
       ogType: 'profile',
       ogImage: artist.avatar_url,
-      keywords: [artist.artist_name, ...(artist.styles || []), ...(artist.techniques || []), 'artysta malarz', 'zleć obraz', artist.location].filter(Boolean),
+      keywords: [artist.artist_name, ...(artist.styles || []), ...(artist.techniques || []), 'artysta malarz', 'zleć obraz', artist.location, ...CORE_INTENTS].filter(Boolean),
       schema,
       bodyContent: artistBody(artist),
     }).replace('/assets/index.js', jsBundle);
@@ -718,6 +732,7 @@ async function main() {
       ? c.budget_min === c.budget_max ? `${c.budget_min} zł` : `${c.budget_min}–${c.budget_max} zł`
       : '';
     const descParts = [
+      `Ręcznie malowany obraz na zamówienie: ${c.title}.`,
       c.public_summary || '',
       c.style ? `Styl: ${c.style}.` : '',
       dims ? `Wymiary: ${dims}.` : '',
@@ -733,7 +748,7 @@ async function main() {
       description: clamp(descParts.join(' '), 155),
       canonicalPath: routePath,
       ogType: 'article',
-      keywords: [c.title, c.style, c.medium, 'zlecenie na obraz', 'zleć obraz', dims].filter(Boolean),
+      keywords: [c.title, c.style, c.medium, 'zlecenie na obraz', 'zleć obraz', dims, ...CORE_INTENTS].filter(Boolean),
       schema,
       bodyContent: commissionBody(c),
     }).replace('/assets/index.js', jsBundle);
