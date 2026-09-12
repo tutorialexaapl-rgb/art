@@ -13,7 +13,7 @@ import type { CommissionStatus } from '@/types';
 
 const STATUS_OPTIONS: { value: CommissionStatus; label: string }[] = [
   { value: 'draft', label: 'Szkic' },
-  { value: 'pending_review', label: 'Oczekuje na review' },
+  { value: 'pending_review', label: 'Oczekuje na weryfikację' },
   { value: 'published', label: 'Opublikowane' },
   { value: 'offers_open', label: 'Otwarte na oferty' },
   { value: 'artist_selected', label: 'Wybrano artystę' },
@@ -24,9 +24,27 @@ const STATUS_OPTIONS: { value: CommissionStatus; label: string }[] = [
   { value: 'closed', label: 'Zamknięte' },
 ];
 
-const ROOM_TYPES = ['living_room', 'bedroom', 'office', 'kitchen', 'hallway', 'child_room', 'other'];
-const INTENDED_USES = ['private', 'gift', 'business', 'public'];
-const ORIENTATIONS = ['portrait', 'landscape', 'square', 'custom'];
+const ROOM_TYPES = [
+  { value: 'living_room', label: 'Salon' },
+  { value: 'bedroom', label: 'Sypialnia' },
+  { value: 'office', label: 'Biuro' },
+  { value: 'kitchen', label: 'Kuchnia' },
+  { value: 'hallway', label: 'Przedpokój' },
+  { value: 'child_room', label: 'Pokój dziecięcy' },
+  { value: 'other', label: 'Inne' },
+];
+const INTENDED_USES = [
+  { value: 'private', label: 'Do prywatnego wnętrza' },
+  { value: 'gift', label: 'Na prezent' },
+  { value: 'business', label: 'Do firmy' },
+  { value: 'public', label: 'Do przestrzeni publicznej' },
+];
+const ORIENTATIONS = [
+  { value: 'portrait', label: 'Pionowa' },
+  { value: 'landscape', label: 'Pozioma' },
+  { value: 'square', label: 'Kwadratowa' },
+  { value: 'custom', label: 'Niestandardowa' },
+];
 
 export function AdminEditCommissionPage() {
   const { id } = useParams();
@@ -209,19 +227,19 @@ export function AdminEditCommissionPage() {
             <div>
               <label className="mb-2 block text-xs font-mono uppercase text-graphite-300">Typ wnętrza</label>
               <Select value={form.roomType} onChange={(e) => update('roomType', e.target.value)}>
-                {ROOM_TYPES.map((r) => <option key={r} value={r}>{r}</option>)}
+                {ROOM_TYPES.map((room) => <option key={room.value} value={room.value}>{room.label}</option>)}
               </Select>
             </div>
             <div>
               <label className="mb-2 block text-xs font-mono uppercase text-graphite-300">Przeznaczenie</label>
               <Select value={form.intendedUse} onChange={(e) => update('intendedUse', e.target.value)}>
-                {INTENDED_USES.map((u) => <option key={u} value={u}>{u}</option>)}
+                {INTENDED_USES.map((use) => <option key={use.value} value={use.value}>{use.label}</option>)}
               </Select>
             </div>
             <div>
               <label className="mb-2 block text-xs font-mono uppercase text-graphite-300">Orientacja</label>
               <Select value={form.orientation} onChange={(e) => update('orientation', e.target.value)}>
-                {ORIENTATIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                {ORIENTATIONS.map((orientation) => <option key={orientation.value} value={orientation.value}>{orientation.label}</option>)}
               </Select>
             </div>
             <div>
