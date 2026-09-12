@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, X, Ban, Search, ImageIcon, Plus, Pencil } from 'lucide-react';
+import { Check, X, Ban, Search, ImageIcon, Plus, Pencil, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/Dashboard';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
@@ -24,6 +24,9 @@ export function AdminArtistsPage() {
   const [rejectTarget, setRejectTarget] = useState<User | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [portfolioPreview, setPortfolioPreview] = useState<User | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const artists = admin.users.filter((u) => u.role === 'artist');
   const filtered = artists.filter((a) =>
@@ -36,6 +39,21 @@ export function AdminArtistsPage() {
     notify('success', `Odrzucono artystę: ${rejectTarget.displayName}`);
     setRejectTarget(null);
     setRejectReason('');
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await admin.deleteUser(deleteTarget.id, deleteReason || 'Trwałe usunięcie konta artysty');
+      notify('success', `Trwale usunięto konto: ${deleteTarget.displayName}`);
+    } catch {
+      notify('error', 'Nie udało się usunąć konta. Spróbuj ponownie.');
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+      setDeleteReason('');
+    }
   }
 
   return (
@@ -142,6 +160,13 @@ export function AdminArtistsPage() {
                       <Check className="h-3 w-3" /> Aktywuj
                     </button>
                   )}
+                  <button
+                    onClick={() => { setDeleteTarget(a); setDeleteReason(''); }}
+                    className="flex items-center gap-1.5 rounded-full bg-error/20 px-4 py-2 text-xs font-medium text-error-light transition-colors hover:bg-error/30"
+                    title="Trwale usuń konto"
+                  >
+                    <Trash2 className="h-3 w-3" /> Usuń konto
+                  </button>
                 </div>
               </CardBody>
             </Card>
@@ -166,6 +191,30 @@ export function AdminArtistsPage() {
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1" onClick={() => { setRejectTarget(null); setRejectReason(''); }}>Anuluj</Button>
             <Button variant="primary" className="flex-1 !bg-error hover:!bg-error-dark" onClick={confirmReject} disabled={!rejectReason.trim()}>Odrzuć</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete modal */}
+      <Modal open={!!deleteTarget} onClose={() => { setDeleteTarget(null); setDeleteReason(''); }} title="Trwałe usunięcie konta" size="sm">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            {deleteTarget && <Avatar name={deleteTarget.displayName} src={deleteTarget.avatarUrl} size="sm" />}
+            <div>
+              <p className="text-sm font-medium text-graphite-600">{deleteTarget?.displayName}</p>
+              <p className="text-xs text-graphite-400">{deleteTarget?.email}</p>
+            </div>
+          </div>
+          <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-xs text-error-light">
+            <strong>Ostrzeżenie:</strong> Ta operacja jest nieodwracalna. Wszystkie dane artysty zostaną trwale usunięte — profil, portfolio, zlecenia, oferty, wiadomości i konto logowania.
+          </div>
+          <div>
+            <label className="mb-2 block text-xs font-mono uppercase text-graphite-300">Powód usunięcia</label>
+            <Textarea rows={3} placeholder="np. Naruszenie regulaminu, prośba artysty..." value={deleteReason} onChange={(e) => setDeleteReason(e.target.value)} />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" className="flex-1" onClick={() => { setDeleteTarget(null); setDeleteReason(''); }} disabled={deleting}>Anuluj</Button>
+            <Button variant="primary" className="flex-1 !bg-error hover:!bg-error-dark" onClick={confirmDelete} disabled={deleting}>{deleting ? 'Usuwanie...' : 'Usuń trwale'}</Button>
           </div>
         </div>
       </Modal>
