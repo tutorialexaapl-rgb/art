@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { artistsService } from '@/services/artistsService';
 import { storageService } from '@/services/storageService';
+import { supabase } from '@/lib/supabase';
 import type { ArtistProfile, ArtistPortfolioItem } from '@/types';
 
 export function AdminEditArtistPage() {
@@ -57,7 +58,24 @@ export function AdminEditArtistPage() {
     if (!id) return;
     setLoading(true);
     try {
-      const p = await artistsService.getArtistProfile(id);
+      let p = await artistsService.getArtistProfile(id);
+
+      if (!p) {
+        const { data: profileRow } = await supabase
+          .from('profiles')
+          .select('id, display_name, email')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (profileRow) {
+          p = await artistsService.createArtistProfileForUser(
+            (profileRow as { id: string; display_name: string; email: string }).id,
+            (profileRow as { id: string; display_name: string; email: string }).display_name || 'Nowy artysta',
+          );
+          notify('info', 'Profil artysty nie istniał — utworzono nowy. Uzupełnij dane i zapisz.');
+        }
+      }
+
       if (!p) {
         notify('error', 'Nie znaleziono profilu artysty.');
         navigate('/admin/artists');

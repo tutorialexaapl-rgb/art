@@ -102,25 +102,61 @@ export const artistsService = {
 
   async getArtistProfile(artistId: string): Promise<ArtistProfile | null> {
     if (!isSupabaseConfigured) {
-      return mockArtistProfiles.find((a) => a.id === artistId) ?? null;
+      return mockArtistProfiles.find((a) => a.id === artistId || a.userId === artistId) ?? null;
     }
     const { data, error } = await supabase
       .from('artist_profiles')
       .select('*')
-      .eq('id', artistId)
+      .or(`id.eq.${artistId},user_id.eq.${artistId}`)
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
 
+    const row = data as ArtistProfileRow;
     const { data: portfolio } = await supabase
       .from('artist_portfolio_items')
       .select('*')
-      .eq('artist_id', artistId);
+      .eq('artist_id', row.id);
 
     return mapArtistProfileRow(
-      data as ArtistProfileRow,
+      row,
       (portfolio as PortfolioItemRow[] | null)?.map(mapPortfolioItemRow) ?? []
     );
+  },
+
+  async createArtistProfileForUser(userId: string, artistName: string): Promise<ArtistProfile> {
+    if (!isSupabaseConfigured) {
+      const existing = mockArtistProfiles.find((profile) => profile.userId === userId);
+      if (!existing) throw new Error('Profil artysty nie istnieje w danych demonstracyjnych.');
+      return existing;
+    }
+
+    const slugBase = artistName.toLowerCase().trim()
+      .replace(/[ą]/g, 'a').replace(/[ć]/g, 'c').replace(/[ę]/g, 'e').replace(/[ł]/g, 'l')
+      .replace(/[ń]/g, 'n').replace(/[ó]/g, 'o').replace(/[ś]/g, 's').replace(/[żź]/g, 'z')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `artysta-${userId.slice(0, 8)}`;
+    const { data, error } = await supabase
+      .from('artist_profiles')
+      .insert({
+        user_id: userId,
+        slug: slugBase,
+        artist_name: artistName,
+        bio: '',
+        location: '',
+        styles: [],
+        techniques: [],
+        specializations: [],
+        price_range_min: 0,
+        price_range_max: 0,
+        average_delivery_days: 14,
+        approval_status: 'approved',
+        is_verified: false,
+        years_experience: 0,
+      })
+      .select('*')
+      .single();
+    if (error) throw error;
+    return mapArtistProfileRow(data as ArtistProfileRow, []);
   },
 
   async updateArtistProfile(artistId: string, updates: Partial<{

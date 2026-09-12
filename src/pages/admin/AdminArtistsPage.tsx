@@ -117,7 +117,7 @@ export function AdminArtistsPage() {
                 {/* Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button 
-                    onClick={() => navigate(`/admin/artysci/${profile?.id ?? a.id}`)}
+                    onClick={() => navigate(`/admin/artysci/${a.id}`)}
                     className="flex items-center gap-1.5 rounded-full bg-graphite-500/30 px-4 py-2 text-xs font-medium text-graphite-100 transition-colors hover:bg-graphite-500/50"
                   >
                     <Pencil className="h-3 w-3" /> Edytuj profil
