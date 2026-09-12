@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, ArrowDownWideNarrow, Users, Image as ImageIcon, FileText, Palette, ChevronDown, Wallet, Clock } from 'lucide-react';
 import { useStaticSeo } from '@/hooks/useSeo';
@@ -250,6 +250,7 @@ export function ZleceniaPage() {
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [sort, setSort] = useState<SortKey>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9);
 
   const allStyles = PAINTING_STYLES;
   const activeFilterCount = useMemo(() => {
@@ -293,6 +294,10 @@ export function ZleceniaPage() {
     });
     return result;
   }, [commissions, filters, sort]);
+
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [filters, sort]);
 
   const clearAll = () => { setFilters(initialFilters); setSort('newest'); };
   const sidebarProps = { filters, setFilters, allStyles, commissions };
@@ -412,7 +417,18 @@ export function ZleceniaPage() {
             ) : error ? (
               <ErrorState title="Nie udało się pobrać zleceń" description={error} onRetry={refetch} />
             ) : filtered.length > 0 ? (
-              <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">{filtered.map((c, i) => <Reveal key={c.id} delay={((i % 3) + 1) as 1 | 2 | 3}><CommissionCard commission={c} isPublicPreview /></Reveal>)}</div>
+              <>
+                <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                  {filtered.slice(0, visibleCount).map((c, i) => <Reveal key={c.id} delay={((i % 3) + 1) as 1 | 2 | 3}><CommissionCard commission={c} isPublicPreview /></Reveal>)}
+                </div>
+                {filtered.length > visibleCount && (
+                  <div className="mt-10 flex justify-center">
+                    <Button variant="secondary" onClick={() => setVisibleCount((count) => count + 9)}>
+                      Załaduj więcej
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <EmptyState title="Brak zleceń" description="Spróbuj zmienić kryteria wyszukiwania lub wyczyść filtry." action={activeFilterCount > 0 ? <Button variant="secondary" onClick={clearAll}>Wyczyść filtry</Button> : undefined} />
             )}

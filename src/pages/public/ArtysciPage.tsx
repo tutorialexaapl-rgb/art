@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, SlidersHorizontal, X, ArrowDownWideNarrow, FileText, Palette, Layers, BookOpen, ChevronDown, Wallet, Clock } from 'lucide-react';
 import { useStaticSeo } from '@/hooks/useSeo';
@@ -250,6 +250,7 @@ export function ArtysciPage() {
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [sort, setSort] = useState<SortKey>('rating');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(9);
   const { artists: approvedArtists, loading, error, refetch } = useArtists();
 
   const allStyles = PAINTING_STYLES;
@@ -293,6 +294,10 @@ export function ArtysciPage() {
 
     return result;
   }, [filters, sort, approvedArtists]);
+
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [filters, sort]);
 
   const clearAll = () => { setFilters(initialFilters); setSort('rating'); };
 
@@ -486,13 +491,22 @@ export function ArtysciPage() {
             ) : error ? (
               <ErrorState title="Nie udało się pobrać artystów" description={error} onRetry={refetch} />
             ) : filtered.length > 0 ? (
-              <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {filtered.map((a, i) => (
-                  <Reveal key={a.id} delay={((i % 3) + 1) as 1 | 2 | 3}>
-                    <ArtistCard artist={a} />
-                  </Reveal>
-                ))}
-              </div>
+              <>
+                <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                  {filtered.slice(0, visibleCount).map((a, i) => (
+                    <Reveal key={a.id} delay={((i % 3) + 1) as 1 | 2 | 3}>
+                      <ArtistCard artist={a} />
+                    </Reveal>
+                  ))}
+                </div>
+                {filtered.length > visibleCount && (
+                  <div className="mt-10 flex justify-center">
+                    <Button variant="secondary" onClick={() => setVisibleCount((count) => count + 9)}>
+                      Załaduj więcej
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <EmptyState
                 title="Brak artystów"
