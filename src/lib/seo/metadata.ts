@@ -6,6 +6,8 @@ import {
   type Schema,
   organizationSchema, websiteSchema, faqSchema,
   breadcrumbSchema, imageObjectSchema, serviceSchema,
+  blogSchema, contactPageSchema, webPageSchema,
+  itemListSchema, collectionPageSchema,
 } from './schema';
 
 /** FAQ entries for the homepage FAQPage schema. */
@@ -221,52 +223,102 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
     ],
   }),
   '/dla-zlecajacych': () => buildPageMetadata({
-    title: 'Zleć Obraz Artyście',
-    description: 'Zleć obraz odpowiadający Twojej wizji. Opublikuj zlecenie, otrzymaj oferty od sprawdzonych artystów i wybierz idealnego twórcę.',
+    title: 'Zleć Obraz Artyście - Ręcznie Malowane na Zamówienie',
+    description: 'Zleć ręcznie malowany obraz dopasowany do Twojej wizji. Opublikuj zlecenie, otrzymaj oferty od zweryfikowanych artystów malarzy. Rejestracja darmowa.',
     path: '/dla-zlecajacych',
     keywordGroup: 'dlaZlecajacych',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Dla zlecających', path: '/dla-zlecajacych' },
+      ]),
+    ],
   }),
   '/dla-artystow': () => buildPageMetadata({
-    title: 'Zlecenia dla Artystów Malarzy',
-    description: 'Znajdź zlecenia na obrazy dopasowane do Twojego stylu. Otrzymuj zlecenia, składaj oferty i buduj portfolio na platformie.',
+    title: 'Zlecenia dla Artystów Malarzy - Rękodzieło i Malarstwo',
+    description: 'Znajdź zlecenia na ręcznie malowane obrazy dopasowane do Twojego stylu. Składaj oferty, buduj portfolio i realizuj zlecenia malarskie online.',
     path: '/dla-artystow',
     keywordGroup: 'dlaArtystow',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Dla artystów', path: '/dla-artystow' },
+      ]),
+    ],
   }),
   '/zlecenia': () => buildPageMetadata({
-    title: 'Aktualne Zlecenia na Obrazy',
-    description: 'Przeglądaj aktualne zlecenia na obrazy ręcznie malowane. Znajdź zlecenie dopasowane do Twojego stylu i złóż ofertę.',
+    title: 'Aktualne Zlecenia na Obrazy Ręcznie Malowane',
+    description: 'Przeglądaj aktualne zlecenia na ręcznie malowane obrazy na zamówienie. Znajdź zlecenie dopasowane do Twojego stylu malarskiego i złóż ofertę.',
     path: '/zlecenia',
     keywordGroup: 'zleceniaListing',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Zlecenia', path: '/zlecenia' },
+      ]),
+    ],
   }),
   '/artysci': () => buildPageMetadata({
-    title: 'Artyści Malarze na Zamówienie',
-    description: 'Przeglądaj profile artystów malarzy. Zobacz portfolio, style i techniki, i zleć obraz u wybranego twórcy.',
+    title: 'Artyści Malarze na Zamówienie - Portfolio i Style',
+    description: 'Przeglądaj profile zweryfikowanych artystów malarzy. Zobacz portfolio, style, techniki i zleć ręcznie malowany obraz u wybranego twórcy.',
     path: '/artysci',
     keywordGroup: 'artysciListing',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Artyści', path: '/artysci' },
+      ]),
+    ],
   }),
   '/jak-to-dziala': () => buildPageMetadata({
     title: 'Jak Zlecić Obraz - Przewodnik Krok po Kroku',
-    description: 'Dowiedz się, jak działa platforma. Od publikacji zlecenia, przez oferty artystów, po realizację projektu i płatności.',
+    description: 'Dowiedz się, jak zlecić ręcznie malowany obraz krok po kroku. Od publikacji zlecenia, przez oferty artystów malarzy, po realizację i płatności.',
     path: '/jak-to-dziala',
     keywordGroup: 'jakToDziala',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Jak to działa', path: '/jak-to-dziala' },
+      ]),
+    ],
   }),
   '/cennik': () => buildPageMetadata({
     title: 'Cennik - Ile Kosztuje Obraz na Zamówienie',
-    description: 'Zobacz opłaty i prowizje platformy. Przejrzyste ceny dla zlecających i artystów. Rejestracja i publikacja zleceń są darmowe.',
+    description: 'Ile kosztuje ręcznie malowany obraz na zamówienie? Zobacz opłaty i prowizje platformy. Przejrzyste ceny dla zlecających i artystów malarzy.',
     path: '/cennik',
     keywordGroup: 'cennik',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Cennik', path: '/cennik' },
+      ]),
+    ],
   }),
   '/faq': () => buildPageMetadata({
     title: 'FAQ - Najczęstsze Pytania o Obrazy na Zamówienie',
-    description: 'Najczęściej zadawane pytania o zlecanie obrazów, oferty, płatności i bezpieczeństwo na platformie.',
+    description: 'Najczęstsze pytania o ręcznie malowane obrazy na zamówienie: zlecanie, oferty artystów, płatności, czas realizacji i bezpieczeństwo.',
     path: '/faq',
     keywordGroup: 'faq',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'FAQ', path: '/faq' },
+      ]),
+      faqSchema(HOMEPAGE_FAQS),
+    ],
   }),
   '/kontakt': () => buildPageMetadata({
-    title: 'Kontakt',
-    description: 'Skontaktuj się z zespołem platformy. Masz pytania, propozycje lub potrzebujesz pomoc? Napisz do nas.',
+    title: 'Kontakt - Platforma Obrazów na Zamówienie',
+    description: 'Skontaktuj się z zespołem platformy Artiors. Masz pytania o zlecanie obrazów, malarstwo lub rękodzieło? Napisz do nas.',
     path: '/kontakt',
     keywordGroup: 'kontakt',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Kontakt', path: '/kontakt' },
+      ]),
+      contactPageSchema(),
+    ],
   }),
   '/regulamin': () => buildPageMetadata({
     title: 'Regulamin',
@@ -354,33 +406,68 @@ export const STATIC_METADATA: Record<string, () => PageMetadata> = {
   }),
   '/obrazy-do-salonu': () => buildPageMetadata({
     title: 'Obrazy do Salonu na Zamówienie',
-    description: 'Zleć obraz do salonu ręcznie malowany - dopasowany do stylu, kolorów i wymiarów wnętrza. Otrzymaj oferty od artystów.',
+    description: 'Zleć ręcznie malowany obraz do salonu - dopasowany do stylu, kolorów i wymiarów wnętrza. Otrzymaj oferty od zweryfikowanych artystów malarzy.',
     path: '/obrazy-do-salonu',
     keywordGroup: 'obrazyDoSalonu',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Obrazy do wnętrz', path: '/obrazy-na-zamowienie' },
+        { name: 'Obrazy do salonu', path: '/obrazy-do-salonu' },
+      ]),
+    ],
   }),
   '/obrazy-do-sypialni': () => buildPageMetadata({
     title: 'Obrazy do Sypialni na Zamówienie',
-    description: 'Zleć obraz do sypialni ręcznie malowany - spokojna paleta, intymna atmosfera. Dopasowany do przestrzeni i nastroju.',
+    description: 'Zleć ręcznie malowany obraz do sypialni - spokojna paleta, intymna atmosfera. Dopasowany do przestrzeni i nastroju przez artystę malarza.',
     path: '/obrazy-do-sypialni',
     keywordGroup: 'obrazyDoSypialni',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Obrazy do wnętrz', path: '/obrazy-na-zamowienie' },
+        { name: 'Obrazy do sypialni', path: '/obrazy-do-sypialni' },
+      ]),
+    ],
   }),
   '/obrazy-do-biura': () => buildPageMetadata({
     title: 'Obrazy do Biura na Zamówienie',
-    description: 'Zleć obraz do biura ręcznie malowany - profesjonalny, inspirujący. Dopasowany do przestrzeni pracy i wizerunku firmy.',
+    description: 'Zleć ręcznie malowany obraz do biura - profesjonalny, inspirujący. Dopasowany do przestrzeni pracy i wizerunku firmy przez artystę malarza.',
     path: '/obrazy-do-biura',
     keywordGroup: 'obrazyDoBiura',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Obrazy do wnętrz', path: '/obrazy-na-zamowienie' },
+        { name: 'Obrazy do biura', path: '/obrazy-do-biura' },
+      ]),
+    ],
   }),
   '/obrazy-do-hotelu': () => buildPageMetadata({
     title: 'Obrazy do Hotelu na Zamówienie',
-    description: 'Zleć obrazy do hotelu - serie dopasowane do pokoi, lobby i stref gastronomicznych. Ręcznie malowane, unikatowe.',
+    description: 'Zleć ręcznie malowane obrazy do hotelu - serie dopasowane do pokoi, lobby i stref gastronomicznych. Unikatowe rękodzieło od artystów malarzy.',
     path: '/obrazy-do-hotelu',
     keywordGroup: 'obrazyDoHotelu',
+    schema: [
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Obrazy do wnętrz', path: '/obrazy-na-zamowienie' },
+        { name: 'Obrazy do hotelu', path: '/obrazy-do-hotelu' },
+      ]),
+    ],
   }),
   '/blog': () => buildPageMetadata({
     title: 'Blog - Porady i Inspiracje',
-    description: 'Porady, inspiracje i przewodniki o obrazach ręcznie malowanych na zamówienie. Dowiedz się, jak zlecić obraz i wybrać artystę.',
+    description: 'Porady, inspiracje i przewodniki o ręcznie malowanych obrazach na zamówienie. Dowiedz się, jak zlecić obraz, wybrać artystę malarza i dopasować dzieło do wnętrza.',
     path: '/blog',
     keywordGroup: 'blog',
+    schema: [
+      blogSchema(),
+      breadcrumbSchema([
+        { name: 'Strona główna', path: '/' },
+        { name: 'Blog', path: '/blog' },
+      ]),
+    ],
   }),
   '/404': () => buildMetadata({
     title: 'Strona Nie Znaleziona (404)',
