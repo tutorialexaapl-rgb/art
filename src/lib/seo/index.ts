@@ -19,7 +19,7 @@
  *   useSeo(generateCommissionMetadata(commission));
  */
 
-export { SEO_CONFIG, SITE_TOPIC, CORE_INTENTS } from './seo-config';
+export { SEO_CONFIG, SITE_TOPIC, CORE_INTENTS, PAINTING_STYLES } from './seo-config';
 export { KEYWORDS, type KeywordGroup } from './keywords';
 export { absoluteUrl, canonicalUrl, normalizePath, selfCanonical } from './canonical';
 export { buildOpenGraph, buildTwitterCard, absoluteDefaultOgImage, type OpenGraphData, type TwitterCardData } from './open-graph';

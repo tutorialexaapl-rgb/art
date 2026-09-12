@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/States'
 import { InternalLinksGrid } from '@/components/seo/InternalLinksGrid';
 import { usePublicCommissions } from '@/hooks/usePublicCommissions';
 import { formatCurrency } from '@/lib/utils';
+import { PAINTING_STYLES } from '@/lib/seo';
 
 const allClientTypes = ['Klient indywidualny', 'Architekt wnętrz', 'Firma / Hotel'];
 
@@ -169,21 +170,19 @@ function CommissionFilters({
         </div>
       </FilterSection>
 
-      {allStyles.length > 0 && (
-        <FilterSection title="Styl obrazu">
-          <div className="space-y-0.5">
-            {allStyles.map((s) => (
-              <CheckboxOption
-                key={s}
-                label={s}
-                checked={filters.styles.includes(s)}
-                onChange={() => toggleArray('styles', s)}
-                count={countByStyle(s)}
-              />
-            ))}
-          </div>
-        </FilterSection>
-      )}
+      <FilterSection title="Styl obrazu">
+        <div className="space-y-0.5">
+          {allStyles.map((s) => (
+            <CheckboxOption
+              key={s}
+              label={s}
+              checked={filters.styles.includes(s)}
+              onChange={() => toggleArray('styles', s)}
+              count={countByStyle(s)}
+            />
+          ))}
+        </div>
+      </FilterSection>
 
       <FilterSection title="Budżet">
         <div className="space-y-1">
@@ -285,7 +284,7 @@ export function ZleceniaPage() {
   const [sort, setSort] = useState<SortKey>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const allStyles = useMemo(() => Array.from(new Set(commissions.map((c) => c.style).filter(Boolean))).sort(), [commissions]);
+  const allStyles = useMemo(() => Array.from(new Set([...PAINTING_STYLES, ...commissions.map((c) => c.style).filter(Boolean)])).sort(), [commissions]);
   const allLocations = useMemo(() => Array.from(new Set(commissions.map((c) => c.location).filter(Boolean) as string[])).sort(), [commissions]);
 
   const activeFilterCount = useMemo(() => {

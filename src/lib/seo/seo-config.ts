@@ -36,6 +36,23 @@ export const CORE_INTENTS = [
   'artyści na zamówienie',
 ] as const;
 
+/**
+ * Stała lista stylów/kategorii malarskich używana w filtrach zleceń i artystów.
+ * Gwarantuje że te opcje są zawsze dostępne w filtrach niezależnie od danych.
+ */
+export const PAINTING_STYLES = [
+  'Portret',
+  'Abstrakcja',
+  'Pejzaż',
+  'Botanika',
+  'Figuratywne',
+  'Architektura',
+  'Martwa natura',
+  'Zwierzęta',
+  'Geometryczne',
+  'Teksturowe',
+] as const;
+
 /** Tracking/query parameters to strip from canonical URLs. */
 export const STRIPPED_PARAMS = [
   'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',

@@ -11,6 +11,7 @@ import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/States'
 import { InternalLinksGrid } from '@/components/seo/InternalLinksGrid';
 import { useArtists } from '@/hooks/useArtists';
 import { formatCurrency } from '@/lib/utils';
+import { PAINTING_STYLES } from '@/lib/seo';
 
 type SortKey = 'rating' | 'experience' | 'price_low' | 'price_high' | 'delivery_fast';
 
@@ -192,21 +193,19 @@ function SidebarFilters({
       </FilterSection>
 
       {/* Styles */}
-      {allStyles.length > 0 && (
-        <FilterSection title="Styl artystyczny">
-          <div className="space-y-0.5">
-            {allStyles.map((s) => (
-              <CheckboxOption
-                key={s}
-                label={s}
-                checked={filters.styles.includes(s)}
-                onChange={() => toggleArray('styles', s)}
-                count={countArtistsByStyle(s)}
-              />
-            ))}
-          </div>
-        </FilterSection>
-      )}
+      <FilterSection title="Styl artystyczny">
+        <div className="space-y-0.5">
+          {allStyles.map((s) => (
+            <CheckboxOption
+              key={s}
+              label={s}
+              checked={filters.styles.includes(s)}
+              onChange={() => toggleArray('styles', s)}
+              count={countArtistsByStyle(s)}
+            />
+          ))}
+        </div>
+      </FilterSection>
 
       {/* Techniques */}
       {allTechniques.length > 0 && (
@@ -267,7 +266,7 @@ export function ArtysciPage() {
   const { artists: approvedArtists, loading, error, refetch } = useArtists();
 
   const allStyles = useMemo(
-    () => Array.from(new Set(approvedArtists.flatMap((a) => a.styles))).sort(),
+    () => Array.from(new Set([...PAINTING_STYLES, ...approvedArtists.flatMap((a) => a.styles)])).sort(),
     [approvedArtists]
   );
   const allTechniques = useMemo(
