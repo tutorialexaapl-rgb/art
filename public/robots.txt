@@ -1,0 +1,60 @@
+# robots.txt - artiors.pl
+# Canonical domain: https://artiors.pl
+
+User-agent: *
+
+# ─── Public indexable pages ─────────────────────────────────────────────────
+Allow: /
+Allow: /obrazy-na-zamowienie
+Allow: /zamow-obraz
+Allow: /zlec-obraz
+Allow: /artysci
+Allow: /artysci/*
+Allow: /zlecenia
+Allow: /zlecenia/*
+Allow: /zlecenia-dla-artystow
+Allow: /blog
+Allow: /blog/*
+Allow: /blog/kategoria/*
+Allow: /obrazy-do-salonu
+Allow: /obrazy-do-sypialni
+Allow: /obrazy-do-biura
+Allow: /obrazy-do-hotelu
+Allow: /obrazy/*
+Allow: /dla-zlecajacych
+Allow: /dla-artystow
+Allow: /jak-to-dziala
+Allow: /cennik
+Allow: /faq
+Allow: /kontakt
+Allow: /regulamin
+Allow: /polityka-prywatnosci
+Allow: /zasady-dla-artystow
+Allow: /zasady-dla-zlecajacych
+
+# ─── Private - never index ──────────────────────────────────────────────────
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /onboarding
+Disallow: /onboarding/
+Disallow: /dashboard
+Disallow: /dashboard/
+Disallow: /admin
+Disallow: /admin/
+Disallow: /settings
+Disallow: /settings/
+Disallow: /messages
+Disallow: /messages/
+Disallow: /suspended
+
+# ─── Private API & storage ──────────────────────────────────────────────────
+Disallow: /api/
+Disallow: /storage/
+Disallow: /*/attachments/
+Disallow: /*/private/
+
+# ─── Sitemap ─────────────────────────────────────────────────────────────────
+Host: https://artiors.pl
+Sitemap: https://artiors.pl/sitemap.xml

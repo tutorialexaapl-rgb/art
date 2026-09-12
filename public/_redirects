@@ -1,0 +1,11 @@
+# SPA fallback - serve index.html for all client-side routes
+# so React Router can handle them. Prerendered HTML takes
+# priority where it exists (Netlify/Cloudflare priority rules).
+/*    /index.html   200
+
+# Sitemap sub-files - proxy to edge function for live database data
+# (Netlify-style rewrites; static sitemap.xml index served from /public)
+/sitemap-pages.xml       /.netlify/functions/sitemap-pages    200
+/sitemap-artists.xml     /.netlify/functions/sitemap-artists  200
+/sitemap-commissions.xml /.netlify/functions/sitemap-commissions 200
+/sitemap-blog.xml        /.netlify/functions/sitemap-blog     200
