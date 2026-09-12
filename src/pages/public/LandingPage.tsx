@@ -24,6 +24,8 @@ import { commissionInspirationAlt, portfolioAlt, sectionImageAlt } from '@/lib/s
 import { formatCurrency, formatDate, timeAgo, truncate } from '@/lib/utils';
 import { HOMEPAGE_FAQS } from '@/lib/seo/metadata';
 import { useArtists } from '@/hooks/useArtists';
+import { usePublicCommissions } from '@/hooks/usePublicCommissions';
+import type { CommissionRequest } from '@/types';
 
 const audienceImages = {
   individual: 'https://images.pexels.com/photos/13141770/pexels-photo-13141770.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -36,12 +38,13 @@ const audienceImages = {
 
 export function LandingPage() {
   useStaticSeo('/');
+  const { commissions: publicCommissions } = usePublicCommissions();
   const sampleCommission = mockCommissions[0];
   const sampleOffers = mockOffers.filter((o) => o.commissionId === sampleCommission.id);
   const sampleComments = mockComments.filter((c) => c.commissionId === sampleCommission.id);
   const sampleProject = mockProjects[0];
   const openCommissions = mockCommissions.filter((c) => c.status === 'offers_open' || c.status === 'published');
-  const showcaseCommissions = openCommissions.slice(0, 6);
+  const showcaseCommissions = publicCommissions.slice(0, 6);
 
   return (
     <div>
@@ -438,7 +441,7 @@ function ZnajdzArtysteSection() {
 
 /* ──────────────────── Section 5: Zobacz przykładowe zlecenia ──────────────────── */
 
-function SampleCommissionsSection({ commissions }: { commissions: typeof mockCommissions }) {
+function SampleCommissionsSection({ commissions }: { commissions: CommissionRequest[] }) {
   return (
     <section className="py-22 bg-ivory-100">
       <div className="container-content">
