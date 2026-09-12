@@ -85,7 +85,7 @@ export function ArtystaDetailPage() {
   if (loading) {
     return (
       <div>
-        <div className="relative h-[300px] overflow-hidden lg:h-[400px]">
+        <div className="relative h-[450px] overflow-hidden lg:h-[600px]">
           <LoadingSkeleton className="h-full w-full rounded-none" />
         </div>
         <div className="container-content -mt-20 relative z-10">
@@ -151,7 +151,7 @@ export function ArtystaDetailPage() {
   return (
     <div>
       {/* Cover */}
-      <div className="relative h-[300px] overflow-hidden lg:h-[400px]">
+      <div className="relative h-[450px] overflow-hidden lg:h-[600px]">
         <SeoImage src={artist.coverUrl} fallbackSrc="/abstract-painting-inspiration.webp" alt={artistCoverAlt(artist)} className="h-full w-full object-cover" loading="eager" fetchPriority="high" />
         <div className="absolute inset-0 bg-gradient-to-t from-graphite-700/80 via-graphite-700/20 to-transparent" />
       </div>
