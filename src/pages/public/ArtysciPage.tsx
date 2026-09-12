@@ -314,12 +314,9 @@ export function ArtysciPage() {
             Poznaj zweryfikowanych artystów malarzy. Każdy ma profil, portfolio i specjalizacje. Portfolio służy pokazaniu stylu i jakości prac - to nie jest sklep.
           </p>
         </Reveal>
-      </div>
 
-      {/* Layout: sidebar + content */}
-      <div className="mt-10 lg:flex lg:gap-8">
-          {/* Desktop sidebar */}
-          <aside className="hidden w-72 shrink-0 lg:block lg:pl-12 xl:pl-20 2xl:pl-32">
+        <div className="relative mt-10">
+          <aside className="hidden w-72 lg:absolute lg:right-full lg:top-0 lg:mr-8 lg:block">
             <div className="sticky top-24">
               <div className="rounded-2xl border border-graphite-400/10 bg-ivory-50 p-6 shadow-sm">
                 <div className="flex items-center justify-between pb-5">
@@ -342,7 +339,7 @@ export function ArtysciPage() {
           </aside>
 
           {/* Main content */}
-          <div className="min-w-0 flex-1 px-6 sm:px-8 lg:px-0 lg:pr-12 lg:max-w-[864px]">
+          <div className="min-w-0">
             {/* Search + sort + mobile filter toggle */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex-1">
@@ -509,6 +506,7 @@ export function ArtysciPage() {
             )}
           </div>
         </div>
+      </div>
 
       {/* Mobile filter drawer */}
       <Drawer
