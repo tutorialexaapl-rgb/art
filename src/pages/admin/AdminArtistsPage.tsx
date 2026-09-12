@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Check, X, Ban, Search, ImageIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, X, Ban, Search, ImageIcon, Plus, Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/ui/Dashboard';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
@@ -14,6 +15,7 @@ import { formatCurrency } from '@/lib/utils';
 import type { User } from '@/types';
 
 export function AdminArtistsPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const admin = useAdmin(user?.id ?? '', user?.displayName ?? 'Admin');
   const { notify } = useToast();
@@ -38,7 +40,18 @@ export function AdminArtistsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Artyści" description="Weryfikacja i zarządzanie artystami." />
+      <PageHeader 
+        title="Artyści" 
+        description="Weryfikacja i zarządzanie artystami." 
+        action={
+          <button 
+            onClick={() => navigate('/admin/artysci/nowy')}
+            className="inline-flex items-center gap-1.5 rounded-full bg-gold-400 px-5 py-2.5 text-sm font-medium text-graphite-700 transition-colors hover:bg-gold-500"
+          >
+            <Plus className="h-4 w-4" /> Nowy artysta
+          </button>
+        }
+      />
 
       <Input placeholder="Szukaj artystów..." value={query} onChange={(e) => setQuery(e.target.value)} icon={<Search className="h-4 w-4" />} />
 
@@ -103,6 +116,12 @@ export function AdminArtistsPage() {
 
                 {/* Actions */}
                 <div className="mt-4 flex flex-wrap gap-2">
+                  <button 
+                    onClick={() => navigate(`/admin/artysci/${profile?.id ?? a.id}`)}
+                    className="flex items-center gap-1.5 rounded-full bg-graphite-500/30 px-4 py-2 text-xs font-medium text-graphite-100 transition-colors hover:bg-graphite-500/50"
+                  >
+                    <Pencil className="h-3 w-3" /> Edytuj profil
+                  </button>
                   {a.status === 'pending' && (
                     <>
                       <button onClick={() => { admin.approveArtist(a.id, 'Zatwierdzenie artysty'); notify('success', `Zatwierdzono: ${a.displayName}`); }} className="flex items-center gap-1.5 rounded-full bg-success/20 px-4 py-2 text-xs font-medium text-success-light transition-colors hover:bg-success/30">

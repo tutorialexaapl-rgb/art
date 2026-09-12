@@ -266,6 +266,43 @@ export const artistsService = {
     if (error) throw error;
   },
 
+  async deletePortfolioItem(itemId: string): Promise<void> {
+    if (!isSupabaseConfigured) return;
+    const { error } = await supabase
+      .from('artist_portfolio_items')
+      .delete()
+      .eq('id', itemId);
+    if (error) throw error;
+  },
+
+  async updatePortfolioItem(itemId: string, updates: Partial<{
+    title: string;
+    technique: string;
+    year: string;
+    widthCm: number;
+    heightCm: number;
+    isPublic: boolean;
+    isForSale: boolean;
+    price: number;
+  }>): Promise<void> {
+    if (!isSupabaseConfigured) return;
+    const row: Record<string, unknown> = {};
+    if (updates.title !== undefined) row.title = updates.title;
+    if (updates.technique !== undefined) row.technique = updates.technique;
+    if (updates.year !== undefined) row.year = updates.year;
+    if (updates.widthCm !== undefined) row.width_cm = updates.widthCm;
+    if (updates.heightCm !== undefined) row.height_cm = updates.heightCm;
+    if (updates.isPublic !== undefined) row.is_public = updates.isPublic;
+    if (updates.isForSale !== undefined) row.is_for_sale = updates.isForSale;
+    if (updates.price !== undefined) row.price = updates.price;
+
+    const { error } = await supabase
+      .from('artist_portfolio_items')
+      .update(row)
+      .eq('id', itemId);
+    if (error) throw error;
+  },
+
   async getApprovedArtists(): Promise<ArtistProfile[]> {
     return this.getAll();
   },

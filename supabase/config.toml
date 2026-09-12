@@ -1,0 +1,17 @@
+[functions.send-email]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.sitemap]
+verify_jwt = false
+
+[functions.create-deposit-checkout]
+verify_jwt = true
+
+[functions.create-final-payment-checkout]
+verify_jwt = true
+
+[functions.admin-create-artist]
+verify_jwt = true
