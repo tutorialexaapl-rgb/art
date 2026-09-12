@@ -1,37 +1,269 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, SlidersHorizontal, X, ArrowDownWideNarrow, FileText, Palette, Layers, BookOpen } from 'lucide-react';
+import { Search, SlidersHorizontal, X, ArrowDownWideNarrow, FileText, Palette, Layers, BookOpen, ChevronDown, Wallet, Clock } from 'lucide-react';
 import { useStaticSeo } from '@/hooks/useSeo';
 import { ArtistCard } from '@/components/features/ArtistCard';
 import { Input, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Reveal } from '@/components/ui/Reveal';
+import { Drawer } from '@/components/ui/Drawer';
 import { EmptyState, ErrorState, LoadingSkeleton } from '@/components/ui/States';
 import { InternalLinksGrid } from '@/components/seo/InternalLinksGrid';
 import { useArtists } from '@/hooks/useArtists';
+import { formatCurrency } from '@/lib/utils';
 
 type SortKey = 'rating' | 'experience' | 'price_low' | 'price_high' | 'delivery_fast';
 
 interface FilterState {
   query: string;
-  style: string;
-  technique: string;
-  location: string;
+  styles: string[];
+  techniques: string[];
+  locations: string[];
   priceMin: string;
   priceMax: string;
   maxDeliveryDays: string;
 }
 
 const initialFilters: FilterState = {
-  query: '', style: 'all', technique: 'all', location: 'all',
+  query: '', styles: [], techniques: [], locations: [],
   priceMin: '', priceMax: '', maxDeliveryDays: '',
 };
+
+const PRICE_PRESETS = [
+  { label: 'Poniżej 1 000 zł', min: '0', max: '1000' },
+  { label: '1 000 – 3 000 zł', min: '1000', max: '3000' },
+  { label: '3 000 – 5 000 zł', min: '3000', max: '5000' },
+  { label: '5 000 – 10 000 zł', min: '5000', max: '10000' },
+  { label: 'Powyżej 10 000 zł', min: '10000', max: '' },
+];
+
+function FilterSection({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border-b border-graphite-400/10 pb-5">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <span className="font-display text-sm font-medium uppercase tracking-wide text-graphite-500">
+          {title}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 text-graphite-300 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      <div
+        className={`overflow-hidden transition-all duration-300 ${open ? 'mt-3 max-h-[500px] opacity-100' : 'mt-0 max-h-0 opacity-0'}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CheckboxOption({
+  label,
+  checked,
+  onChange,
+  count,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: () => void;
+  count?: number;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-graphite-400 transition-colors hover:text-graphite-600">
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-all ${
+          checked
+            ? 'border-gold-400 bg-gold-400'
+            : 'border-graphite-300 bg-transparent hover:border-graphite-400'
+        }`}
+      >
+        {checked && (
+          <svg viewBox="0 0 12 12" className="h-3 w-3 text-white" fill="none">
+            <path d="M2 6l3 3 5-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
+      <span className="flex-1">{label}</span>
+      {count !== undefined && (
+        <span className="text-xs text-graphite-200">{count}</span>
+      )}
+    </label>
+  );
+}
+
+function SidebarFilters({
+  filters,
+  setFilters,
+  allStyles,
+  allTechniques,
+  allLocations,
+  approvedArtists,
+}: {
+  filters: FilterState;
+  setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+  allStyles: string[];
+  allTechniques: string[];
+  allLocations: string[];
+  approvedArtists: ReturnType<typeof useArtists>['artists'];
+}) {
+  const toggleArray = (key: 'styles' | 'techniques' | 'locations', value: string) => {
+    setFilters((prev) => {
+      const arr = prev[key];
+      return {
+        ...prev,
+        [key]: arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value],
+      };
+    });
+  };
+
+  const activePricePreset = PRICE_PRESETS.find(
+    (p) => p.min === filters.priceMin && p.max === filters.priceMax
+  );
+
+  const countArtistsByStyle = (style: string) =>
+    approvedArtists.filter((a) => a.styles.includes(style)).length;
+  const countArtistsByTechnique = (tech: string) =>
+    approvedArtists.filter((a) => a.techniques.includes(tech)).length;
+  const countArtistsByLocation = (loc: string) =>
+    approvedArtists.filter((a) => a.location === loc).length;
+
+  return (
+    <div className="space-y-5">
+      {/* Price range */}
+      <FilterSection title="Cena">
+        <div className="space-y-1">
+          {PRICE_PRESETS.map((p) => {
+            const isActive = activePricePreset?.label === p.label;
+            return (
+              <label
+                key={p.label}
+                className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-graphite-400 transition-colors hover:text-graphite-600"
+              >
+                <span
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-all ${
+                    isActive ? 'border-gold-400 bg-gold-400' : 'border-graphite-300 bg-transparent hover:border-graphite-400'
+                  }`}
+                >
+                  {isActive && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </span>
+                <input
+                  type="radio"
+                  name="price-preset"
+                  checked={isActive}
+                  onChange={() =>
+                    setFilters((prev) => ({ ...prev, priceMin: p.min, priceMax: p.max }))
+                  }
+                  className="sr-only"
+                />
+                {p.label}
+              </label>
+            );
+          })}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Input
+            type="number"
+            placeholder="od"
+            value={filters.priceMin}
+            onChange={(e) => setFilters((prev) => ({ ...prev, priceMin: e.target.value }))}
+            className="text-sm"
+          />
+          <Input
+            type="number"
+            placeholder="do"
+            value={filters.priceMax}
+            onChange={(e) => setFilters((prev) => ({ ...prev, priceMax: e.target.value }))}
+            className="text-sm"
+          />
+        </div>
+      </FilterSection>
+
+      {/* Styles */}
+      {allStyles.length > 0 && (
+        <FilterSection title="Styl artystyczny">
+          <div className="space-y-0.5">
+            {allStyles.map((s) => (
+              <CheckboxOption
+                key={s}
+                label={s}
+                checked={filters.styles.includes(s)}
+                onChange={() => toggleArray('styles', s)}
+                count={countArtistsByStyle(s)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Techniques */}
+      {allTechniques.length > 0 && (
+        <FilterSection title="Technika">
+          <div className="space-y-0.5">
+            {allTechniques.map((t) => (
+              <CheckboxOption
+                key={t}
+                label={t}
+                checked={filters.techniques.includes(t)}
+                onChange={() => toggleArray('techniques', t)}
+                count={countArtistsByTechnique(t)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Location */}
+      {allLocations.length > 0 && (
+        <FilterSection title="Lokalizacja">
+          <div className="space-y-0.5">
+            {allLocations.map((l) => (
+              <CheckboxOption
+                key={l}
+                label={l}
+                checked={filters.locations.includes(l)}
+                onChange={() => toggleArray('locations', l)}
+                count={countArtistsByLocation(l)}
+              />
+            ))}
+          </div>
+        </FilterSection>
+      )}
+
+      {/* Delivery time */}
+      <FilterSection title="Czas realizacji" defaultOpen={false}>
+        <div>
+          <label className="text-xs text-graphite-300">Maksymalnie dni</label>
+          <Input
+            type="number"
+            placeholder="np. 30"
+            value={filters.maxDeliveryDays}
+            onChange={(e) => setFilters((prev) => ({ ...prev, maxDeliveryDays: e.target.value }))}
+            className="mt-1 text-sm"
+          />
+        </div>
+      </FilterSection>
+    </div>
+  );
+}
 
 export function ArtysciPage() {
   useStaticSeo('/artysci');
   const [filters, setFilters] = useState<FilterState>(initialFilters);
   const [sort, setSort] = useState<SortKey>('rating');
-  const [showFilters, setShowFilters] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { artists: approvedArtists, loading, error, refetch } = useArtists();
 
   const allStyles = useMemo(
@@ -47,14 +279,15 @@ export function ArtysciPage() {
     [approvedArtists]
   );
 
-  const update = (key: keyof FilterState, value: string) =>
-    setFilters((prev) => ({ ...prev, [key]: value }));
-
   const activeFilterCount = useMemo(() => {
-    return Object.entries(filters).filter(([k, v]) => {
-      if (k === 'query') return false;
-      return v !== 'all' && v !== '';
-    }).length;
+    let count = 0;
+    count += filters.styles.length;
+    count += filters.techniques.length;
+    count += filters.locations.length;
+    if (filters.priceMin) count++;
+    if (filters.priceMax) count++;
+    if (filters.maxDeliveryDays) count++;
+    return count;
   }, [filters]);
 
   const filtered = useMemo(() => {
@@ -63,9 +296,9 @@ export function ArtysciPage() {
         const q = filters.query.toLowerCase();
         if (!a.artistName.toLowerCase().includes(q) && !a.bio.toLowerCase().includes(q)) return false;
       }
-      if (filters.style !== 'all' && !a.styles.includes(filters.style)) return false;
-      if (filters.technique !== 'all' && !a.techniques.includes(filters.technique)) return false;
-      if (filters.location !== 'all' && a.location !== filters.location) return false;
+      if (filters.styles.length > 0 && !filters.styles.some((s) => a.styles.includes(s))) return false;
+      if (filters.techniques.length > 0 && !filters.techniques.some((t) => a.techniques.includes(t))) return false;
+      if (filters.locations.length > 0 && !filters.locations.includes(a.location)) return false;
       if (filters.priceMin && a.priceRangeMax < parseInt(filters.priceMin)) return false;
       if (filters.priceMax && a.priceRangeMin > parseInt(filters.priceMax)) return false;
       if (filters.maxDeliveryDays && a.averageDeliveryDays > parseInt(filters.maxDeliveryDays)) return false;
@@ -87,6 +320,15 @@ export function ArtysciPage() {
 
   const clearAll = () => { setFilters(initialFilters); setSort('rating'); };
 
+  const sidebarProps = {
+    filters,
+    setFilters,
+    allStyles,
+    allTechniques,
+    allLocations,
+    approvedArtists,
+  };
+
   return (
     <div className="py-16 lg:py-20">
       <div className="container-content">
@@ -98,167 +340,229 @@ export function ArtysciPage() {
           </p>
         </Reveal>
 
-        {/* Search + sort + filter toggle */}
-        <Reveal delay={1}>
-          <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-center">
-            <div className="flex-1">
-              <Input
-                placeholder="Szukaj artystów..."
-                value={filters.query}
-                onChange={(e) => update('query', e.target.value)}
-                icon={<Search className="h-4 w-4" />}
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <ArrowDownWideNarrow className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-graphite-200" />
-                <Select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as SortKey)}
-                  className="min-w-[180px]"
-                >
-                  <option value="rating">Najwyżej oceniani</option>
-                  <option value="experience">Najbardziej doświadczeni</option>
-                  <option value="price_low">Najniższa cena od</option>
-                  <option value="price_high">Najwyższa cena do</option>
-                  <option value="delivery_fast">Najszybsza realizacja</option>
-                </Select>
+        {/* Layout: sidebar + content */}
+        <div className="mt-10 flex gap-8">
+          {/* Desktop sidebar */}
+          <aside className="hidden w-72 shrink-0 lg:block">
+            <div className="sticky top-24">
+              <div className="rounded-2xl border border-graphite-400/10 bg-ivory-50 p-6 shadow-sm">
+                <div className="flex items-center justify-between pb-5">
+                  <h3 className="flex items-center gap-2 font-display text-lg text-graphite-600">
+                    <SlidersHorizontal className="h-4 w-4 text-gold-500" />
+                    Filtry
+                  </h3>
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={clearAll}
+                      className="flex items-center gap-1 text-xs text-graphite-300 transition-colors hover:text-error"
+                    >
+                      <X className="h-3.5 w-3.5" /> Wyczyść
+                    </button>
+                  )}
+                </div>
+                <SidebarFilters {...sidebarProps} />
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => setShowFilters((s) => !s)}
-                className="whitespace-nowrap"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filtry
-                {activeFilterCount > 0 && (
-                  <span className="ml-1 rounded-full bg-gold-400 px-1.5 py-0.5 text-xs font-bold text-white">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </Button>
             </div>
-          </div>
-        </Reveal>
+          </aside>
 
-        {/* Filter panel */}
-        {showFilters && (
-          <Reveal delay={1}>
-            <div className="mt-4 rounded-2xl border border-graphite-400/10 bg-ivory-50 p-6 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="font-display text-lg text-graphite-600">Filtry</h3>
-                {activeFilterCount > 0 && (
-                  <button
-                    onClick={clearAll}
-                    className="flex items-center gap-1.5 text-xs text-graphite-300 hover:text-error transition-colors"
+          {/* Main content */}
+          <div className="min-w-0 flex-1">
+            {/* Search + sort + mobile filter toggle */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="flex-1">
+                <Input
+                  placeholder="Szukaj artystów..."
+                  value={filters.query}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
+                  icon={<Search className="h-4 w-4" />}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <ArrowDownWideNarrow className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-graphite-200" />
+                  <Select
+                    value={sort}
+                    onChange={(e) => setSort(e.target.value as SortKey)}
+                    className="min-w-[180px]"
                   >
-                    <X className="h-3.5 w-3.5" /> Wyczyść wszystkie
+                    <option value="rating">Najwyżej oceniani</option>
+                    <option value="experience">Najbardziej doświadczeni</option>
+                    <option value="price_low">Najniższa cena od</option>
+                    <option value="price_high">Najwyższa cena do</option>
+                    <option value="delivery_fast">Najszybsza realizacja</option>
+                  </Select>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => setMobileFiltersOpen(true)}
+                  className="whitespace-nowrap lg:hidden"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Filtry
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1 rounded-full bg-gold-400 px-1.5 py-0.5 text-xs font-bold text-white">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Active filter chips */}
+            {activeFilterCount > 0 && (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                {filters.styles.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, styles: prev.styles.filter((v) => v !== s) }))
+                    }
+                    className="flex items-center gap-1.5 rounded-full border border-graphite-400/15 bg-ivory-50 px-3 py-1 text-xs text-graphite-400 transition-colors hover:border-error/30 hover:text-error"
+                  >
+                    {s} <X className="h-3 w-3" />
+                  </button>
+                ))}
+                {filters.techniques.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, techniques: prev.techniques.filter((v) => v !== t) }))
+                    }
+                    className="flex items-center gap-1.5 rounded-full border border-graphite-400/15 bg-ivory-50 px-3 py-1 text-xs text-graphite-400 transition-colors hover:border-error/30 hover:text-error"
+                  >
+                    {t} <X className="h-3 w-3" />
+                  </button>
+                ))}
+                {filters.locations.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() =>
+                      setFilters((prev) => ({ ...prev, locations: prev.locations.filter((v) => v !== l) }))
+                    }
+                    className="flex items-center gap-1.5 rounded-full border border-graphite-400/15 bg-ivory-50 px-3 py-1 text-xs text-graphite-400 transition-colors hover:border-error/30 hover:text-error"
+                  >
+                    {l} <X className="h-3 w-3" />
+                  </button>
+                ))}
+                {(filters.priceMin || filters.priceMax) && (
+                  <button
+                    onClick={() => setFilters((prev) => ({ ...prev, priceMin: '', priceMax: '' }))}
+                    className="flex items-center gap-1.5 rounded-full border border-graphite-400/15 bg-ivory-50 px-3 py-1 text-xs text-graphite-400 transition-colors hover:border-error/30 hover:text-error"
+                  >
+                    {filters.priceMin && filters.priceMax
+                      ? `${formatCurrency(parseInt(filters.priceMin))} – ${formatCurrency(parseInt(filters.priceMax))}`
+                      : filters.priceMin
+                        ? `od ${formatCurrency(parseInt(filters.priceMin))}`
+                        : `do ${formatCurrency(parseInt(filters.priceMax))}`}
+                    <X className="h-3 w-3" />
                   </button>
                 )}
+                {filters.maxDeliveryDays && (
+                  <button
+                    onClick={() => setFilters((prev) => ({ ...prev, maxDeliveryDays: '' }))}
+                    className="flex items-center gap-1.5 rounded-full border border-graphite-400/15 bg-ivory-50 px-3 py-1 text-xs text-graphite-400 transition-colors hover:border-error/30 hover:text-error"
+                  >
+                    <Clock className="h-3 w-3" /> do {filters.maxDeliveryDays} dni <X className="h-3 w-3" />
+                  </button>
+                )}
+                <button
+                  onClick={clearAll}
+                  className="text-xs text-graphite-300 underline transition-colors hover:text-error"
+                >
+                  Wyczyść wszystkie
+                </button>
               </div>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <Select label="Styl" value={filters.style} onChange={(e) => update('style', e.target.value)}>
-                  <option value="all">Wszystkie style</option>
-                  {allStyles.map((s) => <option key={s} value={s}>{s}</option>)}
-                </Select>
-                <Select label="Technika" value={filters.technique} onChange={(e) => update('technique', e.target.value)}>
-                  <option value="all">Wszystkie techniki</option>
-                  {allTechniques.map((t) => <option key={t} value={t}>{t}</option>)}
-                </Select>
-                <Select label="Lokalizacja" value={filters.location} onChange={(e) => update('location', e.target.value)}>
-                  <option value="all">Wszystkie lokalizacje</option>
-                  {allLocations.map((l) => <option key={l} value={l}>{l}</option>)}
-                </Select>
-                <div>
-                  <label className="label-elegant">Cena od (PLN)</label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={filters.priceMin}
-                    onChange={(e) => update('priceMin', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-elegant">Cena do (PLN)</label>
-                  <Input
-                    type="number"
-                    placeholder="50000"
-                    value={filters.priceMax}
-                    onChange={(e) => update('priceMax', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="label-elegant">Max czas realizacji (dni)</label>
-                  <Input
-                    type="number"
-                    placeholder="120"
-                    value={filters.maxDeliveryDays}
-                    onChange={(e) => update('maxDeliveryDays', e.target.value)}
-                  />
-                </div>
-              </div>
+            )}
+
+            {/* Result count */}
+            <div className="mt-6 flex items-center gap-2 text-sm text-graphite-300">
+              <Wallet className="h-4 w-4" />
+              {loading ? 'Ładowanie...' : `${filtered.length} ${filtered.length === 1 ? 'artysta' : 'artystów'}`}
             </div>
-          </Reveal>
-        )}
 
-        {/* Result count */}
-        <div className="mt-8 flex items-center gap-2 text-sm text-graphite-300">
-          <SlidersHorizontal className="h-4 w-4" />
-          {loading ? 'Ładowanie...' : `${filtered.length} ${filtered.length === 1 ? 'artysta' : 'artystów'}`}
-        </div>
-
-        {/* Grid: loading skeletons, error, empty state, or results */}
-        {loading ? (
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-graphite-400/10 bg-ivory-50">
-                <div className="grid grid-cols-3 gap-px bg-graphite-400/5">
-                  {Array.from({ length: 3 }).map((_, j) => (
-                    <LoadingSkeleton key={j} className="aspect-square rounded-none" />
-                  ))}
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3">
-                    <LoadingSkeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <LoadingSkeleton className="h-4 w-32" />
-                      <LoadingSkeleton className="h-3 w-20" />
+            {/* Grid */}
+            {loading ? (
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="overflow-hidden rounded-2xl border border-graphite-400/10 bg-ivory-50">
+                    <div className="grid grid-cols-3 gap-px bg-graphite-400/5">
+                      {Array.from({ length: 3 }).map((_, j) => (
+                        <LoadingSkeleton key={j} className="aspect-square rounded-none" />
+                      ))}
+                    </div>
+                    <div className="p-6">
+                      <div className="flex items-center gap-3">
+                        <LoadingSkeleton className="h-10 w-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <LoadingSkeleton className="h-4 w-32" />
+                          <LoadingSkeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <LoadingSkeleton className="h-6 w-16 rounded-full" />
+                        <LoadingSkeleton className="h-6 w-20 rounded-full" />
+                      </div>
+                      <div className="mt-4 flex justify-between">
+                        <LoadingSkeleton className="h-3 w-24" />
+                        <LoadingSkeleton className="h-3 w-20" />
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex gap-2">
-                    <LoadingSkeleton className="h-6 w-16 rounded-full" />
-                    <LoadingSkeleton className="h-6 w-20 rounded-full" />
-                  </div>
-                  <div className="mt-4 flex justify-between">
-                    <LoadingSkeleton className="h-3 w-24" />
-                    <LoadingSkeleton className="h-3 w-20" />
-                  </div>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : error ? (
+              <ErrorState title="Nie udało się pobrać artystów" description={error} onRetry={refetch} />
+            ) : filtered.length > 0 ? (
+              <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {filtered.map((a, i) => (
+                  <Reveal key={a.id} delay={((i % 3) + 1) as 1 | 2 | 3}>
+                    <ArtistCard artist={a} />
+                  </Reveal>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="Brak artystów"
+                description="Spróbuj zmienić kryteria wyszukiwania lub wyczyść filtry."
+                action={
+                  activeFilterCount > 0 ? (
+                    <Button variant="secondary" onClick={clearAll}>Wyczyść filtry</Button>
+                  ) : undefined
+                }
+              />
+            )}
           </div>
-        ) : error ? (
-          <ErrorState title="Nie udało się pobrać artystów" description={error} onRetry={refetch} />
-        ) : filtered.length > 0 ? (
-          <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((a, i) => (
-              <Reveal key={a.id} delay={((i % 3) + 1) as 1 | 2 | 3}>
-                <ArtistCard artist={a} />
-              </Reveal>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Brak artystów"
-            description="Spróbuj zmienić kryteria wyszukiwania lub wyczyść filtry."
-            action={
-              activeFilterCount > 0 ? (
-                <Button variant="secondary" onClick={clearAll}>Wyczyść filtry</Button>
-              ) : undefined
-            }
-          />
-        )}
+        </div>
       </div>
+
+      {/* Mobile filter drawer */}
+      <Drawer
+        open={mobileFiltersOpen}
+        onClose={() => setMobileFiltersOpen(false)}
+        title="Filtry"
+        side="left"
+      >
+        <div className="flex items-center justify-between pb-4">
+          {activeFilterCount > 0 && (
+            <button
+              onClick={clearAll}
+              className="flex items-center gap-1.5 text-xs text-graphite-300 transition-colors hover:text-error"
+            >
+              <X className="h-3.5 w-3.5" /> Wyczyść wszystkie
+            </button>
+          )}
+        </div>
+        <SidebarFilters {...sidebarProps} />
+        <div className="mt-6">
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={() => setMobileFiltersOpen(false)}
+          >
+            Pokaż {filtered.length} {filtered.length === 1 ? 'artystę' : 'artystów'}
+          </Button>
+        </div>
+      </Drawer>
 
       <InternalLinksGrid
         label="Powiązane strony"
