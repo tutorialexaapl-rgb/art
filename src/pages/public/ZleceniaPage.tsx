@@ -284,7 +284,7 @@ export function ZleceniaPage() {
   const [sort, setSort] = useState<SortKey>('newest');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const allStyles = useMemo(() => Array.from(new Set([...PAINTING_STYLES, ...commissions.map((c) => c.style).filter(Boolean)])).sort(), [commissions]);
+  const allStyles = PAINTING_STYLES;
   const allLocations = useMemo(() => Array.from(new Set(commissions.map((c) => c.location).filter(Boolean) as string[])).sort(), [commissions]);
 
   const activeFilterCount = useMemo(() => {
