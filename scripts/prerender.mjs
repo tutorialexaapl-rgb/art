@@ -144,6 +144,7 @@ function buildHead({ title, description, canonicalPath, robots = 'index, follow'
     `<meta charset="UTF-8" />`,
     `<meta name="viewport" content="width=device-width, initial-scale=1.0" />`,
     `<meta name="theme-color" content="#1c1917" />`,
+    `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`,
     `<title>${escapeHtml(titleStr)}</title>`,
     `<meta name="description" content="${escapeHtml(clamp(description, 155))}" />`,
     `<link rel="canonical" href="${escapeHtml(canonical)}" />`,
