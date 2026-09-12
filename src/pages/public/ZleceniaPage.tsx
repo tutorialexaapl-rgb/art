@@ -309,9 +309,10 @@ export function ZleceniaPage() {
           <h1 className="mt-4 font-display text-display text-graphite-600">Otwarte zlecenia</h1>
           <p className="mt-4 max-w-xl text-graphite-400 text-pretty">Przeglądaj zlecenia na ręcznie malowane obrazy. Zalogowani artyści widzą pełne szczegóły i mogą aplikować.</p>
         </Reveal>
+      </div>
 
-        <div className="mt-10 flex gap-8">
-          <aside className="hidden w-72 shrink-0 lg:block">
+      <div className="mt-10 lg:flex lg:gap-8">
+        <aside className="hidden w-72 shrink-0 lg:block lg:pl-12 xl:pl-20 2xl:pl-32">
             <div className="sticky top-24 rounded-2xl border border-graphite-400/10 bg-ivory-50 p-6 shadow-sm">
               <div className="flex items-center justify-between pb-5">
                 <h3 className="flex items-center gap-2 font-display text-lg text-graphite-600"><SlidersHorizontal className="h-4 w-4 text-gold-500" />Filtry</h3>
@@ -321,7 +322,7 @@ export function ZleceniaPage() {
             </div>
           </aside>
 
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 px-6 sm:px-8 lg:px-0 lg:pr-12 lg:max-w-[864px]">
             <Reveal delay={1}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex-1"><Input placeholder="Szukaj zleceń..." value={filters.query} onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))} icon={<Search className="h-4 w-4" />} /></div>
@@ -418,7 +419,6 @@ export function ZleceniaPage() {
             )}
           </div>
         </div>
-      </div>
 
       <Drawer open={mobileFiltersOpen} onClose={() => setMobileFiltersOpen(false)} title="Filtry" side="left">
         <div className="flex items-center justify-between pb-4">{activeFilterCount > 0 && <button onClick={clearAll} className="flex items-center gap-1.5 text-xs text-graphite-300 transition-colors hover:text-error"><X className="h-3.5 w-3.5" /> Wyczyść wszystkie</button>}</div>

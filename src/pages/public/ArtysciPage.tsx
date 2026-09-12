@@ -38,6 +38,17 @@ const PRICE_PRESETS = [
   { label: 'Powyżej 10 000 zł', min: '10000', max: '' },
 ];
 
+const PAINTING_TECHNIQUES = [
+  'Akryl',
+  'Akwarela',
+  'Olej',
+  'Mixed media',
+  'Pasta strukturalna',
+  'Płótno lniane',
+  'Struktura',
+  'Szpachla',
+];
+
 function FilterSection({
   title,
   children,
@@ -110,14 +121,12 @@ function SidebarFilters({
   setFilters,
   allStyles,
   allTechniques,
-  allLocations,
   approvedArtists,
 }: {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   allStyles: string[];
   allTechniques: string[];
-  allLocations: string[];
   approvedArtists: ReturnType<typeof useArtists>['artists'];
 }) {
   const toggleArray = (key: 'styles' | 'techniques' | 'locations', value: string) => {
@@ -138,8 +147,6 @@ function SidebarFilters({
     approvedArtists.filter((a) => a.styles.includes(style)).length;
   const countArtistsByTechnique = (tech: string) =>
     approvedArtists.filter((a) => a.techniques.includes(tech)).length;
-  const countArtistsByLocation = (loc: string) =>
-    approvedArtists.filter((a) => a.location === loc).length;
 
   return (
     <div className="space-y-5">
@@ -207,39 +214,19 @@ function SidebarFilters({
         </div>
       </FilterSection>
 
-      {/* Techniques */}
-      {allTechniques.length > 0 && (
-        <FilterSection title="Technika">
-          <div className="space-y-0.5">
-            {allTechniques.map((t) => (
-              <CheckboxOption
-                key={t}
-                label={t}
-                checked={filters.techniques.includes(t)}
-                onChange={() => toggleArray('techniques', t)}
-                count={countArtistsByTechnique(t)}
-              />
-            ))}
-          </div>
-        </FilterSection>
-      )}
-
-      {/* Location */}
-      {allLocations.length > 0 && (
-        <FilterSection title="Lokalizacja">
-          <div className="space-y-0.5">
-            {allLocations.map((l) => (
-              <CheckboxOption
-                key={l}
-                label={l}
-                checked={filters.locations.includes(l)}
-                onChange={() => toggleArray('locations', l)}
-                count={countArtistsByLocation(l)}
-              />
-            ))}
-          </div>
-        </FilterSection>
-      )}
+      <FilterSection title="Technika">
+        <div className="space-y-0.5">
+          {allTechniques.map((t) => (
+            <CheckboxOption
+              key={t}
+              label={t}
+              checked={filters.techniques.includes(t)}
+              onChange={() => toggleArray('techniques', t)}
+              count={countArtistsByTechnique(t)}
+            />
+          ))}
+        </div>
+      </FilterSection>
 
       {/* Delivery time */}
       <FilterSection title="Czas realizacji" defaultOpen={false}>
@@ -266,14 +253,7 @@ export function ArtysciPage() {
   const { artists: approvedArtists, loading, error, refetch } = useArtists();
 
   const allStyles = PAINTING_STYLES;
-  const allTechniques = useMemo(
-    () => Array.from(new Set(approvedArtists.flatMap((a) => a.techniques))).sort(),
-    [approvedArtists]
-  );
-  const allLocations = useMemo(
-    () => Array.from(new Set(approvedArtists.map((a) => a.location))).sort(),
-    [approvedArtists]
-  );
+  const allTechniques = PAINTING_TECHNIQUES;
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -321,7 +301,6 @@ export function ArtysciPage() {
     setFilters,
     allStyles,
     allTechniques,
-    allLocations,
     approvedArtists,
   };
 
@@ -335,11 +314,12 @@ export function ArtysciPage() {
             Poznaj zweryfikowanych artystów malarzy. Każdy ma profil, portfolio i specjalizacje. Portfolio służy pokazaniu stylu i jakości prac - to nie jest sklep.
           </p>
         </Reveal>
+      </div>
 
-        {/* Layout: sidebar + content */}
-        <div className="mt-10 flex gap-8">
+      {/* Layout: sidebar + content */}
+      <div className="mt-10 lg:flex lg:gap-8">
           {/* Desktop sidebar */}
-          <aside className="hidden w-72 shrink-0 lg:block">
+          <aside className="hidden w-72 shrink-0 lg:block lg:pl-12 xl:pl-20 2xl:pl-32">
             <div className="sticky top-24">
               <div className="rounded-2xl border border-graphite-400/10 bg-ivory-50 p-6 shadow-sm">
                 <div className="flex items-center justify-between pb-5">
@@ -362,7 +342,7 @@ export function ArtysciPage() {
           </aside>
 
           {/* Main content */}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-1 px-6 sm:px-8 lg:px-0 lg:pr-12 lg:max-w-[864px]">
             {/* Search + sort + mobile filter toggle */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <div className="flex-1">
@@ -529,7 +509,6 @@ export function ArtysciPage() {
             )}
           </div>
         </div>
-      </div>
 
       {/* Mobile filter drawer */}
       <Drawer
