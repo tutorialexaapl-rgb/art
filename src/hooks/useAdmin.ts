@@ -4,6 +4,8 @@ import {
   mockProjects, mockComments, mockModerationReports, mockAuditLogs, mockSettings,
   mockContactBypassAttempts,
 } from '@/lib/mockData';
+import { adminService } from '@/services/adminService';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import type {
   AdminAuditLog, ContactBypassAttempt, ModerationEvent, ModerationReport, PlatformSettings, User, UserRole, UserStatus,
 } from '@/types';
@@ -72,6 +74,7 @@ import type { ArtistProfile, ClientProfile } from '@/types';
 
 export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
   const [users, setUsers] = useState<User[]>(() => load(USERS_KEY, mockUsers));
+  const [artistProfiles, setArtistProfiles] = useState<ArtistProfile[]>(mockArtistProfiles);
   const [commissions, setCommissions] = useState(() => load(CONV_KEY, mockCommissions));
   const [comments, setComments] = useState(() => load(COMM_KEY, mockComments));
   const [moderationReports, setModerationReports] = useState<ModerationReport[]>(() => load(REPO_KEY, mockModerationReports));
@@ -256,6 +259,23 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
 
   useEffect(() => { refreshModeration(); }, [refreshModeration]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [dbUsers, dbArtistProfiles] = await Promise.all([
+          adminService.getAllUsers(),
+          adminService.getAllArtistProfiles(),
+        ]);
+        if (cancelled) return;
+        if (dbUsers.length > 0) setUsers(dbUsers);
+        if (dbArtistProfiles.length > 0) setArtistProfiles(dbArtistProfiles);
+      } catch { /* keep fallback data */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const setReportStatus = useCallback(async (id: string, status: ModerationStatus, note?: string) => {
     await updateReportStatus(id, status, adminId, note);
     await refreshModeration();
@@ -275,7 +295,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
     await refreshModeration();
   }, [adminId, adminName, refreshModeration]);
 
-  const getArtistProfile = useCallback((userId: string) => mockArtistProfiles.find((p) => p.userId === userId), []);
+  const getArtistProfile = useCallback((userId: string) => artistProfiles.find((p) => p.userId === userId), [artistProfiles]);
   const getClientProfile = useCallback((userId: string) => mockClientProfiles.find((p) => p.userId === userId), []);
 
   return {

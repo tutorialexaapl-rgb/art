@@ -7,8 +7,12 @@ import {
   type ProfileRow, type ModerationReportRow, type AuditLogRow,
 } from '@/types/database';
 import type {
-  AdminAuditLog, ContactBypassAttempt, ModerationReport, PlatformSettings, User, UserRole, UserStatus,
+  AdminAuditLog, ArtistProfile, ContactBypassAttempt, ModerationReport, PlatformSettings, User, UserRole, UserStatus,
 } from '@/types';
+import {
+  mapArtistProfileRow, mapPortfolioItemRow,
+  type ArtistProfileRow, type PortfolioItemRow,
+} from '@/types/database';
 
 export const adminService = {
   async getAllUsers(): Promise<User[]> {
@@ -118,5 +122,25 @@ export const adminService = {
       return { success: false, message: error.message };
     }
     return { success: true, message: 'Dodano przykładowe dane marketplace.' };
+  },
+
+  async getAllArtistProfiles(): Promise<ArtistProfile[]> {
+    if (!isSupabaseConfigured) {
+      return [];
+    }
+    const { data: artists, error } = await supabase
+      .from('artist_profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    const { data: portfolio } = await supabase
+      .from('artist_portfolio_items')
+      .select('*');
+
+    return (artists as ArtistProfileRow[]).map((row) => {
+      const items = (portfolio as PortfolioItemRow[] | null)?.filter((p) => p.artist_id === row.id) ?? [];
+      return mapArtistProfileRow(row, items.map(mapPortfolioItemRow));
+    });
   },
 };
