@@ -23,6 +23,7 @@ import { SeoImage, HeroImage } from '@/components/ui/SeoImage';
 import { commissionInspirationAlt, portfolioAlt, sectionImageAlt } from '@/lib/seo/alt-text';
 import { formatCurrency, formatDate, timeAgo, truncate } from '@/lib/utils';
 import { HOMEPAGE_FAQS } from '@/lib/seo/metadata';
+import { useArtists } from '@/hooks/useArtists';
 
 const audienceImages = {
   individual: 'https://images.pexels.com/photos/13141770/pexels-photo-13141770.jpeg?auto=compress&cs=tinysrgb&w=800',
@@ -359,7 +360,8 @@ function HowItWorksSection() {
 /* ──────────────────── Section 4: Znajdź artystę ──────────────────── */
 
 function ZnajdzArtysteSection() {
-  const artists = mockArtistProfiles.slice(0, 4);
+  const { artists: databaseArtists } = useArtists();
+  const artists = databaseArtists.slice(0, 4);
   return (
     <section className="py-22 bg-ivory-50">
       <div className="container-content">
