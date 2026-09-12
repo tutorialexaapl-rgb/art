@@ -500,7 +500,7 @@ export function ArtysciPage() {
                   ))}
                 </div>
                 {filtered.length > visibleCount && (
-                  <div className="mt-10 mb-20 flex justify-center lg:mb-28">
+                  <div className="mt-10 flex justify-center">
                     <Button variant="secondary" onClick={() => setVisibleCount((count) => count + 9)}>
                       Załaduj więcej
                     </Button>
