@@ -265,10 +265,7 @@ export function ArtysciPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const { artists: approvedArtists, loading, error, refetch } = useArtists();
 
-  const allStyles = useMemo(
-    () => Array.from(new Set([...PAINTING_STYLES, ...approvedArtists.flatMap((a) => a.styles)])).sort(),
-    [approvedArtists]
-  );
+  const allStyles = PAINTING_STYLES;
   const allTechniques = useMemo(
     () => Array.from(new Set(approvedArtists.flatMap((a) => a.techniques))).sort(),
     [approvedArtists]

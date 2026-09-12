@@ -13,8 +13,6 @@ import { usePublicCommissions } from '@/hooks/usePublicCommissions';
 import { formatCurrency } from '@/lib/utils';
 import { PAINTING_STYLES } from '@/lib/seo';
 
-const allClientTypes = ['Klient indywidualny', 'Architekt wnętrz', 'Firma / Hotel'];
-
 const STATUS_OPTIONS = [
   { value: 'published', label: 'Opublikowane' },
   { value: 'offers_open', label: 'Otwarte na oferty' },
@@ -130,13 +128,11 @@ function CommissionFilters({
   filters,
   setFilters,
   allStyles,
-  allLocations,
   commissions,
 }: {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   allStyles: string[];
-  allLocations: string[];
   commissions: ReturnType<typeof usePublicCommissions>['commissions'];
 }) {
   const toggleArray = (key: 'statuses' | 'styles' | 'orientations' | 'clientTypes' | 'locations', value: string) => {
@@ -152,8 +148,6 @@ function CommissionFilters({
 
   const countByStatus = (status: string) => commissions.filter((c) => c.status === status).length;
   const countByStyle = (style: string) => commissions.filter((c) => c.style.toLowerCase().includes(style.toLowerCase())).length;
-  const countByLocation = (loc: string) => commissions.filter((c) => c.location === loc).length;
-
   return (
     <div className="space-y-5">
       <FilterSection title="Status">
@@ -243,34 +237,7 @@ function CommissionFilters({
         </div>
       </FilterSection>
 
-      <FilterSection title="Zlecający" defaultOpen={false}>
-        <div className="space-y-0.5">
-          {allClientTypes.map((type) => (
-            <CheckboxOption
-              key={type}
-              label={type}
-              checked={filters.clientTypes.includes(type)}
-              onChange={() => toggleArray('clientTypes', type)}
-            />
-          ))}
-        </div>
-      </FilterSection>
 
-      {allLocations.length > 0 && (
-        <FilterSection title="Lokalizacja" defaultOpen={false}>
-          <div className="space-y-0.5">
-            {allLocations.map((loc) => (
-              <CheckboxOption
-                key={loc}
-                label={loc}
-                checked={filters.locations.includes(loc)}
-                onChange={() => toggleArray('locations', loc)}
-                count={countByLocation(loc)}
-              />
-            ))}
-          </div>
-        </FilterSection>
-      )}
     </div>
   );
 }
@@ -285,8 +252,6 @@ export function ZleceniaPage() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const allStyles = PAINTING_STYLES;
-  const allLocations = useMemo(() => Array.from(new Set(commissions.map((c) => c.location).filter(Boolean) as string[])).sort(), [commissions]);
-
   const activeFilterCount = useMemo(() => {
     let count = 0;
     count += filters.statuses.length;
@@ -330,7 +295,7 @@ export function ZleceniaPage() {
   }, [commissions, filters, sort]);
 
   const clearAll = () => { setFilters(initialFilters); setSort('newest'); };
-  const sidebarProps = { filters, setFilters, allStyles, allLocations, commissions };
+  const sidebarProps = { filters, setFilters, allStyles, commissions };
 
   const removeFilter = (key: 'statuses' | 'styles' | 'orientations' | 'clientTypes' | 'locations', value: string) => {
     setFilters((prev) => ({ ...prev, [key]: prev[key].filter((v) => v !== value) }));
