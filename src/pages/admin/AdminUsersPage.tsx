@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Ban, CheckCircle2, RefreshCw, UserCog } from 'lucide-react';
+import { Search, Ban, CheckCircle2, RefreshCw, UserCog, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/Dashboard';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
@@ -27,6 +27,9 @@ export function AdminUsersPage() {
   const [suspendReason, setSuspendReason] = useState('');
   const [roleTarget, setRoleTarget] = useState<User | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>('client');
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = admin.users.filter((u) => {
     if (query && !u.displayName.toLowerCase().includes(query.toLowerCase()) && !u.email.toLowerCase().includes(query.toLowerCase())) return false;
@@ -41,6 +44,21 @@ export function AdminUsersPage() {
     notify('success', `Zawieszono użytkownika ${suspendTarget.displayName}`);
     setSuspendTarget(null);
     setSuspendReason('');
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await admin.deleteUser(deleteTarget.id, deleteReason || 'Trwałe usunięcie konta');
+      notify('success', `Trwale usunięto konto: ${deleteTarget.displayName}`);
+    } catch {
+      notify('error', 'Nie udało się usunąć konta. Spróbuj ponownie.');
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+      setDeleteReason('');
+    }
   }
 
   function confirmRoleChange() {
@@ -124,6 +142,9 @@ export function AdminUsersPage() {
                         <button onClick={() => { setRoleTarget(u); setSelectedRole(u.role); }} className="flex h-8 w-8 items-center justify-center rounded-lg bg-graphite-500/30 text-graphite-200 transition-colors hover:bg-graphite-500/50" title="Zmień rolę">
                           <UserCog className="h-4 w-4" />
                         </button>
+                        <button onClick={() => { setDeleteTarget(u); setDeleteReason(''); }} className="flex h-8 w-8 items-center justify-center rounded-lg bg-error/20 text-error-light transition-colors hover:bg-error/30" title="Usuń konto" disabled={u.id === user?.id}>
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -151,6 +172,30 @@ export function AdminUsersPage() {
           <div className="flex gap-3">
             <Button variant="secondary" className="flex-1" onClick={() => { setSuspendTarget(null); setSuspendReason(''); }}>Anuluj</Button>
             <Button variant="primary" className="flex-1 !bg-error hover:!bg-error-dark" onClick={confirmSuspend}>Zawieś</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete modal */}
+      <Modal open={!!deleteTarget} onClose={() => { setDeleteTarget(null); setDeleteReason(''); }} title="Trwałe usunięcie konta" size="sm">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            {deleteTarget && <Avatar name={deleteTarget.displayName} src={deleteTarget.avatarUrl} size="sm" />}
+            <div>
+              <p className="text-sm font-medium text-graphite-600">{deleteTarget?.displayName}</p>
+              <p className="text-xs text-graphite-400">{deleteTarget?.email}</p>
+            </div>
+          </div>
+          <div className="rounded-lg border border-error/30 bg-error/10 p-3 text-xs text-error-light">
+            <strong>Ostrzeżenie:</strong> Ta operacja jest nieodwracalna. Wszystkie dane użytkownika zostaną trwale usunięte — profil, portfolio, zlecenia, oferty, wiadomości i konto logowania.
+          </div>
+          <div>
+            <label className="mb-2 block text-xs font-mono uppercase text-graphite-300">Powód usunięcia</label>
+            <Textarea rows={3} placeholder="np. Naruszenie regulaminu, prośba użytkownika..." value={deleteReason} onChange={(e) => setDeleteReason(e.target.value)} />
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" className="flex-1" onClick={() => { setDeleteTarget(null); setDeleteReason(''); }} disabled={deleting}>Anuluj</Button>
+            <Button variant="primary" className="flex-1 !bg-error hover:!bg-error-dark" onClick={confirmDelete} disabled={deleting}>{deleting ? 'Usuwanie...' : 'Usuń trwale'}</Button>
           </div>
         </div>
       </Modal>

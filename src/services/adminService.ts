@@ -124,6 +124,23 @@ export const adminService = {
     return { success: true, message: 'Dodano przykładowe dane marketplace.' };
   },
 
+  async deleteUser(userId: string, reason?: string): Promise<void> {
+    if (!isSupabaseConfigured) return;
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ userId, reason }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Nie udało się usunąć konta (${res.status})`);
+    }
+  },
+
   async getAllArtistProfiles(): Promise<ArtistProfile[]> {
     if (!isSupabaseConfigured) {
       return [];

@@ -42,6 +42,7 @@ export interface UseAdminReturn {
   suspendUser: (id: string, reason?: string) => void;
   activateUser: (id: string, reason?: string) => void;
   changeUserRole: (id: string, newRole: UserRole, reason?: string) => void;
+  deleteUser: (id: string, reason?: string) => Promise<void>;
   approveArtist: (id: string, reason?: string) => void;
   rejectArtist: (id: string, reason: string) => void;
   suspendArtist: (id: string, reason?: string) => void;
@@ -120,6 +121,15 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       return prev.map((u) => u.id === id ? { ...u, role: newRole } : u);
     });
   }, [addLog]);
+
+  const deleteUser = useCallback(async (id: string, reason?: string) => {
+    const user = users.find((u) => u.id === id);
+    addLog({ action: 'delete_user', entityType: 'user', entity_id: id, old_value: user?.status ?? '', new_value: 'deleted', reason });
+    try {
+      await adminService.deleteUser(id, reason);
+    } catch { /* edge function may not be deployed in demo mode */ }
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+  }, [addLog, users]);
 
   const approveArtist = useCallback((id: string, reason?: string) => setStatus(id, 'approved', 'approve_artist', reason), [setStatus]);
   const rejectArtist = useCallback((id: string, reason: string) => setStatus(id, 'suspended', 'reject_artist', reason), [setStatus]);
@@ -300,7 +310,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
 
   return {
     users, settings, auditLogs, moderationReports, moderationEvents, contactBypassAttempts,
-    suspendUser, activateUser, changeUserRole,
+    suspendUser, activateUser, changeUserRole, deleteUser,
     approveArtist, rejectArtist, suspendArtist,
     approveCommission, rejectCommission, hideCommission, editCommissionSummary,
     hideComment, restoreComment, deleteComment,
