@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1917" />
+    <link rel="icon" type="image/webp" href="/image_(7).webp" />
+
+    <title>Obrazy Ręcznie Malowane na Zamówienie | Artiors</title>
+    <meta name="description" content="Zamów ręcznie malowany obraz dopasowany do Twojego wnętrza. Opisz swoje potrzeby, dodaj inspiracje i otrzymaj oferty od artystów." />
+    <link rel="canonical" href="https://artiors.pl/" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- ─── Font optimization: reduced weights, preconnect, async load ─── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Only load weights actually used: Inter 400/500/600, Cormorant 400/500/600, JetBrains Mono 400 -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap"
+      />
+    </noscript>
+
+    <!-- ─── Resource hints: dns-prefetch for image CDN ─── -->
+    <link rel="dns-prefetch" href="https://images.pexels.com" />
+    <link rel="preconnect" href="https://images.pexels.com" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Artiors" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:title" content="Obrazy Ręcznie Malowane na Zamówienie | Artiors" />
+    <meta property="og:description" content="Zamów ręcznie malowany obraz dopasowany do Twojego wnętrza. Opisz swoje potrzeby, dodaj inspiracje i otrzymaj oferty od artystów." />
+    <meta property="og:url" content="https://artiors.pl/" />
+    <meta property="og:image" content="https://artiors.pl/og-default.jpg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Obrazy Ręcznie Malowane na Zamówienie | Artiors" />
+    <meta name="twitter:description" content="Zamów ręcznie malowany obraz dopasowany do Twojego wnętrza. Opisz swoje potrzeby, dodaj inspiracje i otrzymaj oferty od artystów." />
+    <meta name="twitter:image" content="https://artiors.pl/og-default.jpg" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Artiors",
+      "url": "https://artiors.pl",
+      "description": "Obrazy ręcznie malowane na zamówienie. Platforma łącząca zlecających z artystami malarzami w Polsce.",
+      "areaServed": { "@type": "Country", "name": "Polska" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Artiors",
+      "url": "https://artiors.pl",
+      "description": "Obrazy Ręcznie Malowane na Zamówienie",
+      "inLanguage": "pl-PL",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://artiors.pl/zlecenia?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
