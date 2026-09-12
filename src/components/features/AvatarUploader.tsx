@@ -70,7 +70,7 @@ export function AvatarUploader({
           <p className="text-xs text-error">{error}</p>
         </div>
       )}
-      <p className="text-xs text-graphite-300">JPG, PNG, WEBP - max 2 MB</p>
+      <p className="text-xs text-graphite-300">JPG, PNG, WEBP - max 8 MB</p>
     </div>
   );
 }

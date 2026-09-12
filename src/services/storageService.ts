@@ -12,7 +12,7 @@ export type StorageBucket =
 const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 const BUCKET_SIZE_LIMITS: Record<StorageBucket, number> = {
-  'avatars': 2 * 1024 * 1024,
+  'avatars': 8 * 1024 * 1024,
   'artist-portfolio': 8 * 1024 * 1024,
   'commission-inspirations': 8 * 1024 * 1024,
   'commission-comment-attachments': 8 * 1024 * 1024,
@@ -31,7 +31,7 @@ const BUCKET_MAX_FILES: Partial<Record<StorageBucket, number>> = {
 };
 
 const BUCKET_MAX_SIZE_MB: Record<StorageBucket, number> = {
-  'avatars': 2,
+  'avatars': 8,
   'artist-portfolio': 8,
   'commission-inspirations': 8,
   'commission-comment-attachments': 8,
