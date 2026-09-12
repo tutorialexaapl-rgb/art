@@ -85,6 +85,7 @@ const AdminCreateArtistPage = lazy(() => import('@/pages/admin/AdminCreateArtist
 const AdminEditArtistPage = lazy(() => import('@/pages/admin/AdminEditArtistPage').then(m => ({ default: m.AdminEditArtistPage })));
 const AdminClientsPage = lazy(() => import('@/pages/admin/AdminPages').then(m => ({ default: m.AdminClientsPage })));
 const AdminCommissionsPage = lazy(() => import('@/pages/admin/AdminPages').then(m => ({ default: m.AdminCommissionsPage })));
+const AdminEditCommissionPage = lazy(() => import('@/pages/admin/AdminEditCommissionPage').then(m => ({ default: m.AdminEditCommissionPage })));
 const AdminCommentsPage = lazy(() => import('@/pages/admin/AdminPages').then(m => ({ default: m.AdminCommentsPage })));
 const AdminOffersPage = lazy(() => import('@/pages/admin/AdminPages').then(m => ({ default: m.AdminOffersPage })));
 const AdminProjectsPage = lazy(() => import('@/pages/admin/AdminPages').then(m => ({ default: m.AdminProjectsPage })));
@@ -213,6 +214,7 @@ function AppRoutes() {
         <Route path="artysci/:id" element={<AdminEditArtistPage />} />
         <Route path="clients" element={<AdminClientsPage />} />
         <Route path="commissions" element={<AdminCommissionsPage />} />
+        <Route path="commissions/:id/edytuj" element={<AdminEditCommissionPage />} />
         <Route path="comments" element={<AdminCommentsPage />} />
         <Route path="offers" element={<AdminOffersPage />} />
         <Route path="projects" element={<AdminProjectsPage />} />

@@ -3,6 +3,7 @@ import {
   Search, Check, X, Ban, Eye, EyeOff, Trash2, Edit3, Flag,
   ShieldAlert, MessageCircleWarning, FileText, CheckCircle2,
   Mail, Send, Loader2, AlertCircle, Filter, Activity, StickyNote,
+  Settings, ExternalLink,
 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/Dashboard';
 import { Card, CardBody } from '@/components/ui/Card';
@@ -13,6 +14,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/States';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useToast } from '@/context/ToastContext';
@@ -92,6 +94,7 @@ export function AdminClientsPage() {
 /* ============ COMMISSIONS ============ */
 export function AdminCommissionsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const admin = useAdmin(user?.id ?? '', user?.displayName ?? 'Admin');
   const { notify } = useToast();
 
@@ -210,6 +213,12 @@ export function AdminCommissionsPage() {
                         <button onClick={() => openSummaryEditor(c)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-400/20 text-gold-300 transition-colors hover:bg-gold-400/30" title="Edytuj podsumowanie">
                           <Edit3 className="h-4 w-4" />
                         </button>
+                        <button onClick={() => navigate(`/admin/commissions/${c.id}/edytuj`)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-400/20 text-gold-300 transition-colors hover:bg-gold-400/30" title="Pełna edycja">
+                          <Settings className="h-4 w-4" />
+                        </button>
+                        <a href={`/zlecenia/${c.slug}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg bg-graphite-500/30 text-graphite-200 transition-colors hover:bg-graphite-500/50" title="Otwórz publicznie">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
                       </div>
                     </td>
                   </tr>

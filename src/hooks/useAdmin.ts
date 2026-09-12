@@ -7,7 +7,7 @@ import {
 import { adminService } from '@/services/adminService';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type {
-  AdminAuditLog, ContactBypassAttempt, ModerationEvent, ModerationReport, PlatformSettings, User, UserRole, UserStatus,
+  AdminAuditLog, ContactBypassAttempt, ModerationEvent, ModerationReport, PlatformSettings, User, UserRole, UserStatus, CommissionRequest,
 } from '@/types';
 import {
   fetchReports, fetchEvents, updateReportStatus, adminHideContent, adminSuspendUser, adminAddNote,
@@ -50,6 +50,8 @@ export interface UseAdminReturn {
   rejectCommission: (id: string, reason: string) => void;
   hideCommission: (id: string, reason?: string) => void;
   editCommissionSummary: (id: string, newSummary: string, reason?: string) => void;
+  updateCommissionFull: (id: string, data: Partial<CommissionRequest>, reason?: string) => void;
+  getCommission: (id: string) => CommissionRequest | undefined;
   hideComment: (id: string, reason?: string) => void;
   restoreComment: (id: string, reason?: string) => void;
   deleteComment: (id: string, reason?: string) => void;
@@ -166,6 +168,18 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       return prev.map((c) => c.id === id ? { ...c, publicSummary: newSummary } : c);
     });
   }, [addLog]);
+
+  const updateCommissionFull = useCallback((id: string, data: Partial<CommissionRequest>, reason?: string) => {
+    setCommissions((prev: typeof mockCommissions) => {
+      const c = prev.find((x) => x.id === id);
+      if (c) addLog({ action: 'edit_commission', entityType: 'commission', entity_id: id, old_value: JSON.stringify({ title: c.title, status: c.status, budgetMin: c.budgetMin, budgetMax: c.budgetMax, deadline: c.deadline, style: c.style, roomType: c.roomType, intendedUse: c.intendedUse, orientation: c.orientation, widthCm: c.widthCm, heightCm: c.heightCm, frameRequired: c.frameRequired, deliveryRequired: c.deliveryRequired, location: c.location, medium: c.medium, mood: c.mood, privateDescription: c.privateDescription, publicSummary: c.publicSummary }), new_value: JSON.stringify(data), reason });
+      return prev.map((c) => c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c);
+    });
+  }, [addLog]);
+
+  const getCommission = useCallback((id: string) => {
+    return load(CONV_KEY, mockCommissions).find((c) => c.id === id);
+  }, []);
 
   const hideComment = useCallback((id: string, reason?: string) => {
     setComments((prev: typeof mockComments) => {
@@ -312,7 +326,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
     users, settings, auditLogs, moderationReports, moderationEvents, contactBypassAttempts,
     suspendUser, activateUser, changeUserRole, deleteUser,
     approveArtist, rejectArtist, suspendArtist,
-    approveCommission, rejectCommission, hideCommission, editCommissionSummary,
+    approveCommission, rejectCommission, hideCommission, editCommissionSummary, updateCommissionFull, getCommission,
     hideComment, restoreComment, deleteComment,
     resolveReport, rejectReport, suspendUserFromReport, hideContentFromReport,
     resolveBypassAttempt, dismissBypassAttempt, suspendUserFromBypass,
