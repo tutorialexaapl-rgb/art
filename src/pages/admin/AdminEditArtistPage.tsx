@@ -108,10 +108,10 @@ export function AdminEditArtistPage() {
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
-    if (!id) return;
+    if (!profile) return;
     setSaving(true);
     try {
-      await artistsService.updateArtistProfile(id, {
+      await artistsService.updateArtistProfile(profile.id, {
         artistName,
         bio,
         location,
@@ -150,14 +150,14 @@ export function AdminEditArtistPage() {
 
   async function handleAddPortfolioItem(e: React.FormEvent) {
     e.preventDefault();
-    if (!id || !pendingImageUrl) {
+    if (!profile || !pendingImageUrl) {
       notify('error', 'Najpierw wgraj zdjęcie.');
       return;
     }
     setAddingItem(true);
     try {
       const item = await artistsService.addPortfolioItem({
-        artistId: id,
+        artistId: profile.id,
         title: newItemTitle || 'Bez tytułu',
         imageUrl: pendingImageUrl,
         technique: newItemTechnique,

@@ -135,11 +135,24 @@ export const artistsService = {
       .replace(/[ą]/g, 'a').replace(/[ć]/g, 'c').replace(/[ę]/g, 'e').replace(/[ł]/g, 'l')
       .replace(/[ń]/g, 'n').replace(/[ó]/g, 'o').replace(/[ś]/g, 's').replace(/[żź]/g, 'z')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || `artysta-${userId.slice(0, 8)}`;
+
+    let slug = slugBase;
+    let suffix = 1;
+    for (;;) {
+      const { data: existing } = await supabase
+        .from('artist_profiles')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle();
+      if (!existing) break;
+      slug = `${slugBase}-${suffix++}`;
+    }
+
     const { data, error } = await supabase
       .from('artist_profiles')
       .insert({
         user_id: userId,
-        slug: slugBase,
+        slug,
         artist_name: artistName,
         bio: '',
         location: '',
