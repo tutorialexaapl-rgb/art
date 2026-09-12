@@ -364,7 +364,6 @@ const FEATURED_ARTIST_NAMES = [
   'Nikodem Halicki',
   'Irena Falska',
   'Honorata Czech',
-  'Brunon Dracz',
 ];
 
 function ZnajdzArtysteSection() {
