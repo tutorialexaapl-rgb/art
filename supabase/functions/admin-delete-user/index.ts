@@ -113,35 +113,13 @@ Deno.serve(async (req: Request) => {
     });
 
     // 3. Delete profile row — ON DELETE CASCADE removes artist_profiles,
-    //    client_profiles, portfolio items, consent_records, etc.
-    //    Tables without CASCADE are cleaned up explicitly below.
-
-    // Clean up tables that reference profiles via non-cascading FKs
-    const cleanupTables: Array<{ table: string; column: string }> = [
-      { table: "commission_status_history", column: "changed_by" },
-      { table: "commission_attachments", column: "uploaded_by" },
-      { table: "commission_comments", column: "author_id" },
-      { table: "commission_offers", column: "artist_id" },
-      { table: "commission_projects", column: "artist_id" },
-      { table: "commission_projects", column: "client_id" },
-      { table: "commission_requests", column: "client_id" },
-      { table: "conversations", column: "artist_id" },
-      { table: "conversations", column: "client_id" },
-      { table: "messages", column: "sender_id" },
-      { table: "milestone_attachments", column: "uploaded_by" },
-      { table: "moderation_events", column: "moderator_id" },
-      { table: "moderation_reports", column: "reported_by" },
-      { table: "moderation_reports", column: "resolved_by" },
-      { table: "platform_settings", column: "updated_by" },
-    ];
-
-    for (const { table, column } of cleanupTables) {
-      // Set nullable FK columns to NULL, or delete rows where the column is NOT NULL
-      await fetch(`${SUPABASE_URL}/rest/v1/${table}?${column}=eq.${userId}`, {
-        method: "DELETE",
-        headers: adminHeaders,
-      }).catch(() => {});
-    }
+    //    client_profiles, portfolio items, consent_records, commission_comments,
+    //    commission_offers, commission_projects, commission_requests,
+    //    conversations, messages.
+    //    Tables with SET NULL FKs (admin_audit_logs, moderation_reports,
+    //    moderation_events, commission_status_history, commission_attachments,
+    //    milestone_attachments, platform_settings) are handled automatically
+    //    by the database — no manual cleanup needed.
 
     // 4. Delete the profile row
     const deleteProfileRes = await fetch(

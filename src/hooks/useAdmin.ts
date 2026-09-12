@@ -127,9 +127,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
   const deleteUser = useCallback(async (id: string, reason?: string) => {
     const user = users.find((u) => u.id === id);
     addLog({ action: 'delete_user', entityType: 'user', entity_id: id, old_value: user?.status ?? '', new_value: 'deleted', reason });
-    try {
-      await adminService.deleteUser(id, reason);
-    } catch { /* edge function may not be deployed in demo mode */ }
+    await adminService.deleteUser(id, reason);
     setUsers((prev) => prev.filter((u) => u.id !== id));
   }, [addLog, users]);
 
