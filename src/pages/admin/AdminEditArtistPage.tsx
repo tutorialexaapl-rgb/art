@@ -58,7 +58,7 @@ export function AdminEditArtistPage() {
     if (!id) return;
     setLoading(true);
     try {
-      let p = await artistsService.getArtistProfile(id);
+      let p = await artistsService.getByUserId(id);
 
       if (!p) {
         const { data: profileRow } = await supabase
