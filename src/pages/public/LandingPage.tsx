@@ -359,9 +359,19 @@ function HowItWorksSection() {
 
 /* ──────────────────── Section 4: Znajdź artystę ──────────────────── */
 
+const FEATURED_ARTIST_NAMES = [
+  'Oskar Renski',
+  'Nikodem Halicki',
+  'Irena Falska',
+  'Honorata Czech',
+  'Brunon Dracz',
+];
+
 function ZnajdzArtysteSection() {
   const { artists: databaseArtists } = useArtists();
-  const artists = databaseArtists.slice(0, 4);
+  const artists = FEATURED_ARTIST_NAMES
+    .map((name) => databaseArtists.find((artist) => artist.artistName === name))
+    .filter((artist): artist is NonNullable<typeof artist> => Boolean(artist));
   return (
     <section className="py-22 bg-ivory-50">
       <div className="container-content">
