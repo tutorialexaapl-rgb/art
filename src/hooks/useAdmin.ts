@@ -5,6 +5,7 @@ import {
   mockContactBypassAttempts,
 } from '@/lib/mockData';
 import { adminService } from '@/services/adminService';
+import { commissionsService } from '@/services/commissionsService';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import type {
   AdminAuditLog, ContactBypassAttempt, ModerationEvent, ModerationReport, PlatformSettings, User, UserRole, UserStatus, CommissionRequest,
@@ -34,6 +35,7 @@ let logSeq = 0;
 
 export interface UseAdminReturn {
   users: User[];
+  commissions: CommissionRequest[];
   settings: PlatformSettings;
   auditLogs: AdminAuditLog[];
   moderationReports: ModerationReport[];
@@ -51,6 +53,7 @@ export interface UseAdminReturn {
   hideCommission: (id: string, reason?: string) => void;
   editCommissionSummary: (id: string, newSummary: string, reason?: string) => void;
   updateCommissionFull: (id: string, data: Partial<CommissionRequest>, reason?: string) => void;
+  deleteCommission: (id: string, reason?: string) => Promise<void>;
   getCommission: (id: string) => CommissionRequest | undefined;
   hideComment: (id: string, reason?: string) => void;
   restoreComment: (id: string, reason?: string) => void;
@@ -141,6 +144,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       if (c) addLog({ action: 'approve_commission', entityType: 'commission', entity_id: id, old_value: c.status, new_value: 'published', reason });
       return prev.map((c) => c.id === id ? { ...c, status: 'published' as const } : c);
     });
+    if (isSupabaseConfigured) commissionsService.updateStatus(id, 'published').catch(() => {});
   }, [addLog]);
 
   const rejectCommission = useCallback((id: string, reason: string) => {
@@ -149,6 +153,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       if (c) addLog({ action: 'reject_commission', entityType: 'commission', entity_id: id, old_value: c.status, new_value: 'rejected', reason });
       return prev.map((c) => c.id === id ? { ...c, status: 'rejected' as const } : c);
     });
+    if (isSupabaseConfigured) commissionsService.updateStatus(id, 'rejected').catch(() => {});
   }, [addLog]);
 
   const hideCommission = useCallback((id: string, reason?: string) => {
@@ -157,6 +162,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       if (c) addLog({ action: 'hide_commission', entityType: 'commission', entity_id: id, old_value: c.status, new_value: 'hidden', reason });
       return prev.map((c) => c.id === id ? { ...c, status: 'hidden' as const } : c);
     });
+    if (isSupabaseConfigured) commissionsService.updateStatus(id, 'hidden').catch(() => {});
   }, [addLog]);
 
   const editCommissionSummary = useCallback((id: string, newSummary: string, reason?: string) => {
@@ -165,6 +171,7 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       if (c) addLog({ action: 'edit_commission_summary', entityType: 'commission', entity_id: id, old_value: c.publicSummary ?? '', new_value: newSummary, reason });
       return prev.map((c) => c.id === id ? { ...c, publicSummary: newSummary } : c);
     });
+    if (isSupabaseConfigured) commissionsService.updatePublicSummary(id, newSummary).catch(() => {});
   }, [addLog]);
 
   const updateCommissionFull = useCallback((id: string, data: Partial<CommissionRequest>, reason?: string) => {
@@ -173,11 +180,29 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
       if (c) addLog({ action: 'edit_commission', entityType: 'commission', entity_id: id, old_value: JSON.stringify({ title: c.title, status: c.status, budgetMin: c.budgetMin, budgetMax: c.budgetMax, deadline: c.deadline, style: c.style, roomType: c.roomType, intendedUse: c.intendedUse, orientation: c.orientation, widthCm: c.widthCm, heightCm: c.heightCm, frameRequired: c.frameRequired, deliveryRequired: c.deliveryRequired, location: c.location, medium: c.medium, mood: c.mood, privateDescription: c.privateDescription, publicSummary: c.publicSummary }), new_value: JSON.stringify(data), reason });
       return prev.map((c) => c.id === id ? { ...c, ...data, updatedAt: new Date().toISOString() } : c);
     });
+    if (isSupabaseConfigured && data.status) {
+      commissionsService.updateStatus(id, data.status).catch(() => {});
+    }
   }, [addLog]);
 
+  const deleteCommission = useCallback(async (id: string, reason?: string) => {
+    const commission = commissions.find((c) => c.id === id);
+    if (!commission) return;
+    await commissionsService.deleteCommission(id);
+    addLog({
+      action: 'delete_commission',
+      entityType: 'commission',
+      entity_id: id,
+      old_value: commission.status,
+      new_value: 'deleted',
+      reason,
+    });
+    setCommissions((prev) => prev.filter((c) => c.id !== id));
+  }, [addLog, commissions]);
+
   const getCommission = useCallback((id: string) => {
-    return load(CONV_KEY, mockCommissions).find((c) => c.id === id);
-  }, []);
+    return commissions.find((c) => c.id === id);
+  }, [commissions]);
 
   const hideComment = useCallback((id: string, reason?: string) => {
     setComments((prev: typeof mockComments) => {
@@ -286,13 +311,15 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
     let cancelled = false;
     (async () => {
       try {
-        const [dbUsers, dbArtistProfiles] = await Promise.all([
+        const [dbUsers, dbArtistProfiles, dbCommissions] = await Promise.all([
           adminService.getAllUsers(),
           adminService.getAllArtistProfiles(),
+          commissionsService.getAll(),
         ]);
         if (cancelled) return;
         if (dbUsers.length > 0) setUsers(dbUsers);
         if (dbArtistProfiles.length > 0) setArtistProfiles(dbArtistProfiles);
+        if (dbCommissions.length > 0) setCommissions(dbCommissions);
       } catch { /* keep fallback data */ }
     })();
     return () => { cancelled = true; };
@@ -321,10 +348,10 @@ export function useAdmin(adminId: string, adminName: string): UseAdminReturn {
   const getClientProfile = useCallback((userId: string) => mockClientProfiles.find((p) => p.userId === userId), []);
 
   return {
-    users, settings, auditLogs, moderationReports, moderationEvents, contactBypassAttempts,
+    users, commissions, settings, auditLogs, moderationReports, moderationEvents, contactBypassAttempts,
     suspendUser, activateUser, changeUserRole, deleteUser,
     approveArtist, rejectArtist, suspendArtist,
-    approveCommission, rejectCommission, hideCommission, editCommissionSummary, updateCommissionFull, getCommission,
+    approveCommission, rejectCommission, hideCommission, editCommissionSummary, updateCommissionFull, deleteCommission, getCommission,
     hideComment, restoreComment, deleteComment,
     resolveReport, rejectReport, suspendUserFromReport, hideContentFromReport,
     resolveBypassAttempt, dismissBypassAttempt, suspendUserFromBypass,

@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/ui/Dashboard';
 import { Card, CardBody } from '@/components/ui/Card';
 import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { useAuth } from '@/context/AuthContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useToast } from '@/context/ToastContext';
+import { commissionsService } from '@/services/commissionsService';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import type { CommissionStatus } from '@/types';
 
 const STATUS_OPTIONS: { value: CommissionStatus; label: string }[] = [
@@ -56,6 +59,8 @@ export function AdminEditCommissionPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [reason, setReason] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -83,36 +88,46 @@ export function AdminEditCommissionPage() {
 
   useEffect(() => {
     if (!id) return;
-    const c = admin.getCommission(id);
-    if (!c) {
-      notify('error', 'Zlecenie nie zostało znalezione.');
-      navigate('/admin/commissions');
-      return;
-    }
-    setForm({
-      title: c.title,
-      publicSummary: c.publicSummary,
-      privateDescription: c.privateDescription,
-      status: c.status,
-      style: c.style,
-      mood: c.mood,
-      medium: c.medium ?? '',
-      roomType: c.roomType,
-      intendedUse: c.intendedUse,
-      orientation: c.orientation,
-      widthCm: c.widthCm,
-      heightCm: c.heightCm,
-      budgetMin: c.budgetMin,
-      budgetMax: c.budgetMax,
-      deadline: c.deadline,
-      location: c.location ?? '',
-      frameRequired: c.frameRequired,
-      deliveryRequired: c.deliveryRequired,
-      preferredColors: (c.preferredColors ?? []).join(', '),
-      colorsToAvoid: (c.colorsToAvoid ?? []).join(', '),
-      tags: (c.tags ?? []).join(', '),
-    });
-    setLoading(false);
+    let cancelled = false;
+    (async () => {
+      let c = admin.getCommission(id);
+      if (!c && isSupabaseConfigured) {
+        try {
+          c = await commissionsService.getById(id);
+        } catch { /* ignore */ }
+      }
+      if (cancelled) return;
+      if (!c) {
+        notify('error', 'Zlecenie nie zostało znalezione.');
+        navigate('/admin/commissions');
+        return;
+      }
+      setForm({
+        title: c.title,
+        publicSummary: c.publicSummary,
+        privateDescription: c.privateDescription,
+        status: c.status,
+        style: c.style,
+        mood: c.mood,
+        medium: c.medium ?? '',
+        roomType: c.roomType,
+        intendedUse: c.intendedUse,
+        orientation: c.orientation,
+        widthCm: c.widthCm,
+        heightCm: c.heightCm,
+        budgetMin: c.budgetMin,
+        budgetMax: c.budgetMax,
+        deadline: c.deadline,
+        location: c.location ?? '',
+        frameRequired: c.frameRequired,
+        deliveryRequired: c.deliveryRequired,
+        preferredColors: (c.preferredColors ?? []).join(', '),
+        colorsToAvoid: (c.colorsToAvoid ?? []).join(', '),
+        tags: (c.tags ?? []).join(', '),
+      });
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
   }, [id]);
 
   function update<K extends keyof typeof form>(key: K, value: typeof form[K]) {
@@ -156,6 +171,21 @@ export function AdminEditCommissionPage() {
       notify('error', 'Nie udało się zapisać zmian.');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await admin.deleteCommission(id, 'Usunięcie zlecenia przez admina');
+      notify('success', 'Zlecenie zostało trwale usunięte.');
+      navigate('/admin/commissions');
+    } catch {
+      notify('error', 'Nie udało się usunąć zlecenia. Spróbuj ponownie.');
+      setDeleteOpen(false);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -335,7 +365,21 @@ export function AdminEditCommissionPage() {
         <Button variant="gold" className="flex-1" onClick={handleSave} disabled={saving}>
           {saving ? <><div className="h-4 w-4 animate-spin rounded-full border-2 border-graphite-700 border-t-transparent" /> Zapisywanie...</> : <><Save className="h-4 w-4" /> Zapisz zmiany</>}
         </Button>
+        <Button variant="primary" className="!bg-error hover:!bg-error-dark" onClick={() => setDeleteOpen(true)} disabled={saving}>
+          <Trash2 className="h-4 w-4" /> Usuń zlecenie
+        </Button>
       </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+        title="Usunąć zlecenie?"
+        description={`Zlecenie „${form.title}” zostanie trwale usunięte z bazy. Tej operacji nie można cofnąć.`}
+        confirmLabel="Usuń trwale"
+        danger
+        loading={deleting}
+      />
     </div>
   );
 }

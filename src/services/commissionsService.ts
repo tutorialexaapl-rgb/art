@@ -284,6 +284,15 @@ export const commissionsService = {
     if (error) throw error;
   },
 
+  async deleteCommission(id: string): Promise<void> {
+    if (!isSupabaseConfigured) return;
+    const { error } = await supabase
+      .from('commission_requests')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  },
+
   async updatePublicSummary(id: string, summary: string): Promise<void> {
     if (!isSupabaseConfigured) return;
     const { error } = await supabase

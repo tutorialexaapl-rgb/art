@@ -13,9 +13,9 @@ import { OBRAZY_KATEGORIE, OBRAZY_WNETRZ } from '@/lib/seo';
 import { OBRAZY_NA_ZAMOWIENIE_FAQS } from '@/lib/seo/metadata';
 import { SeoImage, HeroImage } from '@/components/ui/SeoImage';
 
-const HERO_IMAGE = '/hero-painting-detail.png';
-const SECTION_IMAGE_1 = '/section-painting-blue.png';
-const SECTION_IMAGE_2 = '/artist-with-painting-alt.png';
+const HERO_IMAGE = '/hero-painting-detail.webp';
+const SECTION_IMAGE_1 = '/section-painting-blue.webp';
+const SECTION_IMAGE_2 = '/artist-with-painting-alt.webp';
 
 const BLOG_TEASERS = [
   { slug: 'jak-zlecic-obraz-przewodnik', title: 'Jak zlecić obraz - kompletny przewodnik', category: 'poradniki' },

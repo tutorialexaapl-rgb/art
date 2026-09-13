@@ -51,6 +51,9 @@ export {
   PUBLIC_ROUTES, NOINDEX_ROUTES,
   OBRAZY_KATEGORIE, OBRAZY_WNETRZ, BLOG_KATEGORIE,
   getObrazKategoria, getObrazyWnetrz, getBlogKategoria,
+  KATEGORIA_IMAGES, WNETRZE_IMAGES,
+  KATEGORIA_COMMISSIONS, WNETRZE_COMMISSIONS,
   type RouteEntry, type ObrazKategoria, type ObrazyWnetrz, type BlogKategoria,
+  type SampleImage, type SampleCommission,
 } from './seo-routes';
 export { SITEMAP_ENDPOINTS, pingSearchEngines, verifySitemap } from './sitemap';

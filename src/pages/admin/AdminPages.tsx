@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/Badge';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { EmptyState } from '@/components/ui/States';
 import { Modal } from '@/components/ui/Modal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -104,34 +105,29 @@ export function AdminCommissionsPage() {
   const [summaryText, setSummaryText] = useState('');
   const [rejectTarget, setRejectTarget] = useState<CommissionRequest | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<CommissionRequest | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  // Load commissions from localStorage via the hook's internal state - but we need
-  // the commissions array exposed. Since useAdmin doesn't expose it directly,
-  // we use mockCommissions as fallback for read and admin actions for mutations.
-  // For a proper MVP, we read from the admin hook's localStorage-backed state.
-  // We'll use a local state synced to localStorage.
-  const [commissions, setCommissions] = useState<CommissionRequest[]>(() => {
-    try {
-      const raw = localStorage.getItem('app_admin_commissions_v1');
-      if (raw) return JSON.parse(raw) as CommissionRequest[];
-    } catch { /* ignore */ }
-    return [] as CommissionRequest[];
-  });
+  const commissions = admin.commissions;
 
-  // Sync: poll localStorage for commission changes
-  useState(() => {
-    const interval = setInterval(() => {
-      try {
-        const raw = localStorage.getItem('app_admin_commissions_v1');
-        if (raw) setCommissions(JSON.parse(raw) as CommissionRequest[]);
-      } catch { /* ignore */ }
-    }, 500);
-    return () => clearInterval(interval);
-  });
+  const statusCounts: { value: string; label: string; count: number }[] = [
+    { value: 'all', label: 'Wszystkie', count: commissions.length },
+    { value: 'pending_review', label: 'Oczekujące', count: commissions.filter((c) => c.status === 'pending_review').length },
+    { value: 'published', label: 'Opublikowane', count: commissions.filter((c) => c.status === 'published').length },
+    { value: 'offers_open', label: 'Otwarte na oferty', count: commissions.filter((c) => c.status === 'offers_open').length },
+    { value: 'in_progress', label: 'W realizacji', count: commissions.filter((c) => c.status === 'in_progress' || c.status === 'artist_selected').length },
+    { value: 'completed', label: 'Zakończone', count: commissions.filter((c) => c.status === 'completed' || c.status === 'closed').length },
+    { value: 'hidden', label: 'Ukryte', count: commissions.filter((c) => c.status === 'hidden').length },
+    { value: 'rejected', label: 'Odrzucone', count: commissions.filter((c) => c.status === 'rejected').length },
+  ];
 
   const filtered = commissions.filter((c) => {
-    if (query && !c.title.toLowerCase().includes(query.toLowerCase())) return false;
-    if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+    if (query && !c.title.toLowerCase().includes(query.toLowerCase()) && !c.clientName.toLowerCase().includes(query.toLowerCase())) return false;
+    if (statusFilter === 'in_progress') {
+      if (c.status !== 'in_progress' && c.status !== 'artist_selected') return false;
+    } else if (statusFilter === 'completed') {
+      if (c.status !== 'completed' && c.status !== 'closed') return false;
+    } else if (statusFilter !== 'all' && c.status !== statusFilter) return false;
     return true;
   });
 
@@ -155,16 +151,49 @@ export function AdminCommissionsPage() {
     setRejectReason('');
   }
 
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await admin.deleteCommission(deleteTarget.id, 'Usunięcie zlecenia przez admina');
+      notify('success', `Usunięto zlecenie: ${deleteTarget.title}`);
+      setDeleteTarget(null);
+    } catch {
+      notify('error', 'Nie udało się usunąć zlecenia. Spróbuj ponownie.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Zlecenia" description="Moderacja wszystkich zleceń na platformie." />
 
+      <div className="flex flex-wrap gap-2">
+        {statusCounts.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => setStatusFilter(s.value)}
+            className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+              statusFilter === s.value
+                ? 'border-gold-400/40 bg-gold-400/15 text-gold-200'
+                : 'border-graphite-500/30 bg-graphite-600 text-graphite-300 hover:border-graphite-400/40 hover:text-graphite-100'
+            }`}
+          >
+            <span>{s.label}</span>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              statusFilter === s.value ? 'bg-gold-400/30 text-gold-100' : 'bg-graphite-500/40 text-graphite-200'
+            }`}>{s.count}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Input placeholder="Szukaj zleceń..." value={query} onChange={(e) => setQuery(e.target.value)} icon={<Search className="h-4 w-4" />} />
+        <Input placeholder="Szukaj zleceń po tytule lub kliencie..." value={query} onChange={(e) => setQuery(e.target.value)} icon={<Search className="h-4 w-4" />} />
         <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="sm:w-48">
           <option value="all">Wszystkie statusy</option>
-          <option value="published">Opublikowane</option>
           <option value="pending_review">Oczekujące</option>
+          <option value="published">Opublikowane</option>
           <option value="offers_open">Otwarte na oferty</option>
           <option value="in_progress">W realizacji</option>
           <option value="completed">Zakończone</option>
@@ -175,7 +204,14 @@ export function AdminCommissionsPage() {
 
       <Card className="bg-graphite-600 border-graphite-500/30">
         <CardBody className="p-0">
-          <div className="overflow-x-auto">
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={<FileText className="h-7 w-7" />}
+              title="Brak zleceń"
+              description={statusFilter === 'all' ? 'Na platformie nie ma jeszcze żadnych zleceń.' : 'Brak zleceń w wybranym statusie.'}
+            />
+          ) : (
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-graphite-500/30 text-graphite-300">
                 <th className="px-6 py-3 text-left font-mono text-xs uppercase">Zlecenie</th>
@@ -216,6 +252,9 @@ export function AdminCommissionsPage() {
                         <button onClick={() => navigate(`/admin/commissions/${c.id}/edytuj`)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold-400/20 text-gold-300 transition-colors hover:bg-gold-400/30" title="Pełna edycja">
                           <Settings className="h-4 w-4" />
                         </button>
+                        <button onClick={() => setDeleteTarget(c)} className="flex h-8 w-8 items-center justify-center rounded-lg bg-error/20 text-error-light transition-colors hover:bg-error/30" title="Usuń zlecenie">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                         <a href={`/zlecenia/${c.slug}`} target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-lg bg-graphite-500/30 text-graphite-200 transition-colors hover:bg-graphite-500/50" title="Otwórz publicznie">
                           <ExternalLink className="h-4 w-4" />
                         </a>
@@ -226,6 +265,7 @@ export function AdminCommissionsPage() {
               </tbody>
             </table>
           </div>
+          )}
         </CardBody>
       </Card>
 
@@ -258,6 +298,18 @@ export function AdminCommissionsPage() {
           </div>
         </div>
       </Modal>
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Usunąć zlecenie?"
+        description={`Zlecenie „${deleteTarget?.title}” zostanie trwale usunięte z bazy. Tej operacji nie można cofnąć.`}
+        confirmLabel="Usuń trwale"
+        danger
+        loading={deleting}
+      />
     </div>
   );
 }

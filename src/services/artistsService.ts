@@ -6,10 +6,12 @@ import {
 } from '@/types/database';
 import type { ArtistProfile, ArtistPortfolioItem, ApprovalStatus, User } from '@/types';
 
+const HIDDEN_USER_IDS = new Set(['13246542-c73f-42ae-8167-ecddf12c26a6']);
+
 export const artistsService = {
   async getAll(): Promise<ArtistProfile[]> {
     if (!isSupabaseConfigured) {
-      return mockArtistProfiles.filter((a) => a.approvalStatus === 'approved');
+      return mockArtistProfiles.filter((a) => a.approvalStatus === 'approved' && !HIDDEN_USER_IDS.has(a.userId));
     }
     const { data: artists, error } = await supabase
       .from('artist_profiles')
@@ -23,15 +25,19 @@ export const artistsService = {
       .select('*')
       .eq('is_public', true);
 
-    return (artists as ArtistProfileRow[]).map((row) => {
-      const items = (portfolio as PortfolioItemRow[] | null)?.filter((p) => p.artist_id === row.id) ?? [];
-      return mapArtistProfileRow(row, items.map(mapPortfolioItemRow));
-    });
+    return (artists as ArtistProfileRow[])
+      .filter((row) => !HIDDEN_USER_IDS.has(row.user_id))
+      .map((row) => {
+        const items = (portfolio as PortfolioItemRow[] | null)?.filter((p) => p.artist_id === row.id) ?? [];
+        return mapArtistProfileRow(row, items.map(mapPortfolioItemRow));
+      });
   },
 
   async getBySlug(slug: string): Promise<ArtistProfile | null> {
     if (!isSupabaseConfigured) {
-      return mockArtistProfiles.find((a) => a.slug === slug && a.approvalStatus === 'approved') ?? null;
+      const mock = mockArtistProfiles.find((a) => a.slug === slug && a.approvalStatus === 'approved') ?? null;
+      if (mock && HIDDEN_USER_IDS.has(mock.userId)) return null;
+      return mock;
     }
     const { data, error } = await supabase
       .from('artist_profiles')
@@ -41,6 +47,7 @@ export const artistsService = {
       .maybeSingle();
     if (error) throw error;
     if (!data) return null;
+    if (HIDDEN_USER_IDS.has((data as ArtistProfileRow).user_id)) return null;
 
     const { data: portfolio } = await supabase
       .from('artist_portfolio_items')

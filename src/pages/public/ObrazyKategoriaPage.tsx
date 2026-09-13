@@ -7,13 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { CommissionCard } from '@/components/features/CommissionCard';
 import { ArtistCard } from '@/components/features/ArtistCard';
-import { EmptyState, LoadingSkeleton } from '@/components/ui/States';
+import { LoadingSkeleton } from '@/components/ui/States';
 import {
   getObrazKategoria, OBRAZY_KATEGORIE, OBRAZY_WNETRZ,
+  KATEGORIA_IMAGES, KATEGORIA_COMMISSIONS,
   buildObrazKategoriaMetadata, collectionPageSchema, breadcrumbSchema,
 } from '@/lib/seo';
 import { usePublicCommissions } from '@/hooks/usePublicCommissions';
 import { useArtists } from '@/hooks/useArtists';
+import { SeoImage } from '@/components/ui/SeoImage';
+import { SampleCommissionCard } from '@/components/features/SampleCommissionCard';
 
 export function ObrazyKategoriaPage() {
   const { kategoria } = useParams<{ kategoria: string }>();
@@ -98,6 +101,74 @@ export function ObrazyKategoriaPage() {
         </div>
       </section>
 
+      {KATEGORIA_IMAGES[kat.slug] && (
+        <section className="py-22 bg-ivory-50">
+          <div className="container-gallery">
+            <Reveal>
+              <div className="text-center">
+                <p className="section-label">Przykładowe obrazy</p>
+                <h2 className="mt-4 font-display text-display text-graphite-600 text-balance">Inspiracje · {kat.name.toLowerCase()}</h2>
+                <p className="mx-auto mt-4 max-w-xl text-graphite-400 text-pretty">
+                  Przykładowe prace w tym stylu. Każdy obraz jest tworzony indywidualnie przez artystę malarza.
+                </p>
+              </div>
+            </Reveal>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {KATEGORIA_IMAGES[kat.slug].map((img, i) => (
+                <Reveal key={img.src} delay={((i % 3) + 1) as 1 | 2 | 3}>
+                  <div className="group overflow-hidden rounded-2xl border border-graphite-400/10 bg-ivory-100 shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                    <div className="aspect-[4/5] overflow-hidden">
+                      <SeoImage
+                        src={img.src}
+                        alt={img.alt}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+            <Reveal delay={2}>
+              <div className="mt-10 text-center">
+                <Link to="/zamow-obraz">
+                  <Button variant="primary" size="lg">Zleć obraz w tym stylu <ArrowRight className="h-4 w-4" /></Button>
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      {KATEGORIA_COMMISSIONS[kat.slug] && (
+        <section className="py-22 bg-ivory-100">
+          <div className="container-gallery">
+            <Reveal>
+              <div className="text-center">
+                <p className="section-label">Przykładowe zlecenia</p>
+                <h2 className="mt-4 font-display text-display text-graphite-600 text-balance">Zlecenia w stylu {kat.name.toLowerCase()}</h2>
+                <p className="mx-auto mt-4 max-w-xl text-graphite-400 text-pretty">
+                  Zobacz, jak wyglądają zlecenia w tym stylu. Każde prowadzi do artystow, ktorzy aplikuja z ofertami.
+                </p>
+              </div>
+            </Reveal>
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {KATEGORIA_COMMISSIONS[kat.slug].map((c, i) => (
+                <Reveal key={c.title} delay={((i % 3) + 1) as 1 | 2 | 3}>
+                  <SampleCommissionCard commission={c} />
+                </Reveal>
+              ))}
+            </div>
+            <Reveal delay={2}>
+              <div className="mt-10 text-center">
+                <Link to="/zamow-obraz">
+                  <Button variant="primary" size="lg">Opublikuj podobne zlecenie <ArrowRight className="h-4 w-4" /></Button>
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
       {matchingCommissions.length > 0 && (
         <section className="py-22 bg-ivory-50">
           <div className="container-content">
@@ -170,17 +241,6 @@ export function ObrazyKategoriaPage() {
                 </Link>
               </div>
             </Reveal>
-          </div>
-        </section>
-      )}
-
-      {matchingCommissions.length === 0 && matchingArtists.length === 0 && !loadingCommissions && !loadingArtists && (
-        <section className="py-22 bg-ivory-50">
-          <div className="container-content">
-            <EmptyState
-              title="Brak zleceń i artystów w tej kategorii"
-              description="Opublikuj zlecenie w tym stylu - artyści je znajdą i odpowiedzą ofertami."
-            />
           </div>
         </section>
       )}

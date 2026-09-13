@@ -120,8 +120,8 @@ export const mockCommissions: CommissionRequest[] = [
     interiorImages: [],
     inspirationImages: [
       '/abstract-painting-inspiration.webp',
-      '/hero-inspiration-1.png',
-      '/hero-inspiration-2.png',
+      '/hero-inspiration-1.webp',
+      '/hero-inspiration-2.webp',
     ],
     tags: ['Abstrakcja', 'Wnętrza', 'Duży format', 'Tekstura'], medium: 'Akryl, mieszane media',
     createdAt: '2025-07-20T14:00:00Z', updatedAt: '2025-07-20T14:00:00Z',

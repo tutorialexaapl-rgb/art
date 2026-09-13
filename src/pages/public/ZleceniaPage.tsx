@@ -308,7 +308,7 @@ export function ZleceniaPage() {
 
   return (
     <div className="py-16 lg:py-20">
-      <div className="container-content">
+      <div className="container-content pb-20 lg:pb-28">
         <Reveal>
           <p className="section-label">Marketplace</p>
           <h1 className="mt-4 font-display text-display text-graphite-600">Otwarte zlecenia</h1>

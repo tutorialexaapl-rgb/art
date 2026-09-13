@@ -161,7 +161,7 @@ function HeroMockup({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-4">
           <div className="aspect-[3/4] overflow-hidden rounded-2xl shadow-lg">
-            <HeroImage src="/hero-inspiration-1.png" alt={commissionInspirationAlt(commission, 0)} className="h-full w-full object-cover" />
+            <HeroImage src="/hero-inspiration-1.webp" alt={commissionInspirationAlt(commission, 0)} className="h-full w-full object-cover" />
           </div>
           <div className="aspect-square overflow-hidden rounded-2xl shadow-lg">
             <HeroImage src="/abstract-painting-inspiration.webp" alt={commissionInspirationAlt(commission, 1)} className="h-full w-full object-cover" />
@@ -170,7 +170,7 @@ function HeroMockup({
         <div className="space-y-4 pt-12">
           <div className="aspect-square overflow-hidden rounded-2xl shadow-lg">
             <img
-              src="/hero-inspiration-2.png"
+              src="/hero-inspiration-2.webp"
               alt={commissionInspirationAlt(commission, 2)}
               className="h-full w-full object-cover"
               loading="eager"
@@ -231,7 +231,7 @@ function HeroMockup({
         <div className="flex items-center gap-2">
           <div className="flex -space-x-2">
             {mockArtistProfiles.slice(0, 3).map((a, idx) => (
-              <Avatar key={a.userId} name={a.artistName} src={['/artist-with-painting-alt.png', '/avatar-lena-wojcik.webp', '/avatar-maja-sokolowska.webp'][idx]} size="xs" className="border-2 border-graphite-600" />
+              <Avatar key={a.userId} name={a.artistName} src={['/artist-with-painting-alt.webp', '/avatar-lena-wojcik.webp', '/avatar-maja-sokolowska.webp'][idx]} size="xs" className="border-2 border-graphite-600" />
             ))}
           </div>
           <div>
@@ -286,7 +286,7 @@ function InteriorDopasowanieSection() {
           <Reveal delay={1}>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { img: '/section-painting-warm.png', label: 'Salon', path: '/obrazy-do-salonu' },
+                { img: '/section-painting-warm.webp', label: 'Salon', path: '/obrazy-do-salonu' },
                 { img: audienceImages.office, label: 'Biuro', path: '/obrazy-do-biura' },
                 { img: audienceImages.hotel, label: 'Hotel', path: '/obrazy-do-hotelu' },
               ].map((item, i) => (
@@ -770,7 +770,7 @@ function ProjectDashboardMockup() {
           <div className="mt-4 grid grid-cols-3 gap-3">
             {project.progressImages.map((img) => (
               <div key={img.id} className="group aspect-square overflow-hidden rounded-lg border border-graphite-500/30">
-                <SeoImage src={img.imageUrl} fallbackSrc="/abstract-painting-inspiration.webp" alt={img.caption} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                <SeoImage src={img.id === 'pi-2' ? '/obraz_2.webp' : img.id === 'pi-3' ? '/obraz_3.webp' : '/obraz_1.webp'} fallbackSrc="/abstract-painting-inspiration.webp" alt={img.caption} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
               </div>
             ))}
           </div>
@@ -1252,7 +1252,7 @@ function ProjectDashboardPreview({ project }: { project: typeof mockProjects[0] 
                 <div className="mt-4 grid grid-cols-3 gap-3">
                   {project.progressImages.map((img) => (
                     <div key={img.id} className="group aspect-square overflow-hidden rounded-lg border border-graphite-500/30">
-                      <SeoImage src={img.imageUrl} fallbackSrc="/abstract-painting-inspiration.webp" alt={img.caption} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <SeoImage src={img.id === 'pi-2' ? '/obraz_2.webp' : img.id === 'pi-3' ? '/obraz_3.webp' : '/obraz_1.webp'} fallbackSrc="/abstract-painting-inspiration.webp" alt={img.caption} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                   ))}
                 </div>
